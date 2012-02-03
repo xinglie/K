@@ -1,0 +1,1 @@
+cscript _.js true
