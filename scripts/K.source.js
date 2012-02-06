@@ -34,8 +34,8 @@ T.cache('K',[],function () {
 		/// <returns type="Integer" />
 		a = _q.call(arguments, 4);
 		f = _r(f) ? f : _u;
-		g = g || this;
-		t=t||8;
+		g = g || K;
+		t = t || 8;
 		z=function(){f.apply(g,a);};
 		return b ? W.setInterval(z,t) : W.setTimeout(z,t);
 	},
@@ -48,7 +48,7 @@ T.cache('K',[],function () {
     U = true,
     V = false,
     X = '_$_',
-    Y = [],
+    //Y = [],
     //$A,
 	$F,
     $G = function (y, z, i) {
@@ -69,7 +69,7 @@ T.cache('K',[],function () {
     //$h = /([?|.{}\\()+\-*\/^$\[\]])/g,
     $o = function (g, c) {
     	/// <summary>helper for K.drag</summary>
-		//K.log('startDrag move');
+		//log('startDrag move');
     	g = K.evt(g);
     	if (g) {
     		c = K.evtPageXY(g);
@@ -98,7 +98,7 @@ T.cache('K',[],function () {
     	/// <summary>simple tween</summary>
     	return c * a / d + b
     },
-    $s, $t, $u, $v, $w, $x,
+    $t, $u, $v, $w, $x,
     $y = !!W.getComputedStyle,
     _c = function (e, w) {
     	/// <summary>cancel event bubble and default</summary>
@@ -127,7 +127,7 @@ T.cache('K',[],function () {
     	/// <summary>enlarge typeof</summary>
     	/// <param name="a" type="Object">object</param>
     	/// <returns type="String" />
-    	return (t = typeof (a)) == B ? a == Q && Q + '' || M(_p.call(a).slice(8, -1)) : t
+    	return (t = typeof (a)) == B ? a == Q && Q+'' || M(_p.call(a).slice(8, -1)) : t
     },
     _k = function (d, s, f, r, p, b) {
     	/// <summary>extend object</summary>
@@ -152,15 +152,11 @@ T.cache('K',[],function () {
     _o = W.XMLHttpRequest,
     _p = Object[P].toString,
     _q = Array[P].slice,
-    _r = function (a,r) {
+    _r = function (a) {
     	/// <summary>judge is method</summary>
     	/// <param name="a" type="Object">param</param>
     	/// <returns type="Boolean" />
-    	try{
-			r=/^\s*\bfunction\b/.test(a)
-		}catch(e){
-		}
-		return r;
+    	return _j(a) == $c;
     },
     _s = function (a) {
     	/// <summary>judge is array</summary>
@@ -169,17 +165,23 @@ T.cache('K',[],function () {
     	return _j(a) == $d
     },
     _t=function(a){
-		/// <summary></summary>
-		return a&&a[A]&&_j(a)!=$f&&!a.nodeType
+		/// <summary>like array</summary>
+		return a && K.isNum(a[A]) && !K.isStr(a) && !_r(a) && !a.nodeType && !a.window && !a.callee;
 	},
 	_u = function () {
 		/// <summary>empty method</summary>
 	},
 	_w = 'on',
 	$ = {},
-    $d = _j(Y),
+	$c = _j(M),
+    $d = _j(H),
     $f = _j(P),
     _v = _j($g),
+	log = function () {
+		/// <summary>log</summary>
+		var a = W.console, b = arguments;
+		if (a && a.log) a.log.apply ? a.log.apply(a, b) : a.log(_q.call(b))
+	},
     Z;
 	K = function (v, a, s,d) {
 		/// <summary>create or get DOM node</summary>
@@ -190,24 +192,21 @@ T.cache('K',[],function () {
 		if (typeof (v) != B) v = (d || D)[a || s ? 'createElement' : 'getElementById'](v);
 		a && K.nodeAttr(v, a);
 		s && K.nodeStyle(v, s);
-		try {
-			return v
-		} finally {
-			v = Q
-		}
+		return v
 	};
 	_k(K, {
-		e: _w,
+		//e: _w,
 		fn: _u,
 		type: _j,
 		mix: _k,
 		stopDrag: $p,
 		now: $q,
 		evtHalt: _c,
+		log:log,
 		isArr: _s,
 		isFn: _r,
-		timer:R,
-		clsTimer:T,
+		startTimer:R,
+		stopTimer:T,
 		strTrim: function (s,r) {
 			/// <summary>trim or trim by regexp</summary>
 			/// <param name="s" type="String">src string</param>
@@ -270,15 +269,10 @@ T.cache('K',[],function () {
 			/// <returns type="String" />
 			return K.strSwap(s ,f ? [/&lt;/g, /&gt;/g, /&quot;/g, /&amp;/g] : [/&/g, /"/g, /</g, />/g], f ? ['<', '>', '"', '&'] : ['&amp;', '&quot;', '&lt;', '&gt;']);
 		},
-		log: function () {
-			/// <summary>log</summary>
-			var a = W.console, b = arguments;
-			if (a && a.log) a.log.apply ? a.log.apply(a, b) : a.log(_q.call(b))
-		},
 		logTime: function (a) {
 			/// <summary>log time</summary>
 			if (has.call(M,a)) {
-				K.log(a + ':' + ($q() - M[a]) + 'ms');
+				log(a + ':' + ($q() - M[a]) + 'ms');
 				delete M[a]
 			} else {
 				M[a] = $q()
@@ -300,7 +294,7 @@ T.cache('K',[],function () {
 			/// <returns type="Boolean" />
 			return a === Z;
 		},
-		isObj: function (a) {
+		isObject: function (a) {
 			/// <summary>judge is object</summary>
 			/// <param name="a" type="Object">param</param>
 			/// <returns type="Boolean" />
@@ -312,11 +306,17 @@ T.cache('K',[],function () {
 			/// <returns type="Boolean" />
 			return _j(a) == $f
 		},
-		isReg: function (a) {
+		isRegExp: function (a) {
 			/// <summary>judge is regexp</summary>
 			/// <param name="a" type="Object">param</param>
 			/// <returns type="Boolean" />
 			return _j(a) == _v
+		},
+		isNum:function(a){
+			/// <summary>judge is number</summary>
+			/// <param name="a" type="Object">param</param>
+			/// <returns type="Boolean" />
+			return _j(a) == 'number' && isFinite(a);	
 		},
 		id: function () {
 			/// <summary>get a unique id</summary>
@@ -332,7 +332,7 @@ T.cache('K',[],function () {
 					r[b]();
 					return r[b];
 				} catch (e) {
-					K.log('K.test', e);
+					log('K.test', e);
 				}
 			}
 			return _u
@@ -350,7 +350,7 @@ T.cache('K',[],function () {
 			for (p in o) if (has.call(o,p)) c[p] = $G(y, o[p]);//use $o.hasOwnProperty avoid obj o rewrite the hasOwnProperty method
 			return c
 		},
-		clsPage: function (w) {
+		clear: function (w) {
 			/// <summary>clear select zone</summary>
 			w=w||W;
 			if((w=w.getSelection)){
@@ -360,7 +360,7 @@ T.cache('K',[],function () {
 				else w=Q;
 			}
 		},
-		equal: function (b, c, f, i, l) {
+		/*equal: function (b, c, f, i, l) {
 			/// <summary>judge is equal,detect array own value is equal</summary>
 			/// <param name="b" type="Object">first param</param>
 			/// <param name="c" type="Object">second param</param>
@@ -372,7 +372,7 @@ T.cache('K',[],function () {
 				return U
 			}
 			return f ? b == c : b === c
-		},
+		},*/
 		bind: function (f, o, a) {
 			/// <summary>bind method to object</summary>
 			/// <param name="f" type="Function">method</param>
@@ -381,7 +381,7 @@ T.cache('K',[],function () {
 			a = _q.call(arguments, 2);
 			f=_r(f)?f:_u;
 			return function () {
-				return f.apply(o || this, a.concat(_q.call(arguments)))
+				return f.apply(o || K, a.concat(_q.call(arguments)))
 			}
 		},
 		body: function (d,a) {
@@ -435,7 +435,7 @@ T.cache('K',[],function () {
 			}
 			return w
 		},
-		tags: function (n, o, f, r, a, i, j,l,b) {
+		tags: function (n, o, f, r, a, i, j,l,b,s) {
 			/// <summary>get the elements by tag names</summary>
 			/// <param name="n" type="String">tag names</param>
 			/// <param name="o" type="String|HTMLElement">in what node</param>
@@ -449,25 +449,22 @@ T.cache('K',[],function () {
 				b=_r(f);
 				z:while(n[++j]){
 					i=a.getElementsByTagName(n[j]);
-					if(b||n[A]>1){
-						l=-1;
-						while(i[++l]){
-							try{
-								(b?f(i[l]):r)&&r.push(i[l]);
-							}catch(e){
-								if(e==_w)break z;
-								K.log(e,f,i[l]);
-							}
+					l=-1;
+					while(i[++l]){
+						try{
+							s=b?f(i[l]):U;
+							if(s===V)break z;
+							s&&r.push(i[l]);
+						}catch(e){
+							log(e,f,i[l]);
 						}
-					}else{
-						r=i
 					}
 				}
 			}
 			return r
 		},
 		Evt: {
-			fireEvt: function (a, c, b, d, f, g) {
+			fire: function (a, c, b, d, f, g) {
 				/// <summary>fire event</summary>
 				/// <param name="a" type="String">event name</param>
 				/// <param name="c" type="Object">event params</param>
@@ -481,25 +478,24 @@ T.cache('K',[],function () {
 				if (_s(f = d[f = X + a])) {
 					for (g = 0; f[g]; g++) {
 						try {
-							f[g](c,d)
+							if(f[g](c,d)===V)break;
 						} catch (e) {
-							if (e == _w) break;
-							K.log(e, f[g])
+							log(e, f[g])
 						}
 					}
 				}
 				try{
 					_r(d[f = _w + a]) && d[f](c, d);
 				}catch(e){
-					K.log(e,d[f]);
+					log(e,d[f]);
 				}
-				b && d.clsEvt(a)
+				b && d.off(a)
 			},
 			on: function (a, c, b, i) {
 				/// <summary>add event listen</summary>
 				/// <param name="a" type="String">event name</param>
 				/// <param name="c" type="Function">callback</param>
-				/// <returns type="This" />
+				/// <returns type="This" /> 
 				b = this;
 				a = K.isArr(a) ? a : [a];
 				while (a[A]) {
@@ -512,17 +508,17 @@ T.cache('K',[],function () {
 				/// <summary>remove event listen</summary>
 				/// <param name="a" type="String">event name</param>
 				/// <param name="c" type="Function">callback</param>
-				/// <returns type="This" />
+				/// <returns type="This" /> 
 				a = K.isArr(a) ? a : [a];
 				while (a[A]) {
 					K.arrRemove(this[X + M(a.pop())], c);
 				}
 				return this
 			},
-			clsEvt: function (a, t) {
+			off: function (a, t) {
 				/// <summary>clear one event listen</summary>
 				/// <param name="a" type="String">event name</param>
-				/// <returns type="This" />
+				/// <returns type="This" /> 
 				t = this;
 				a = M(a);
 				delete t[X + a];
@@ -539,7 +535,7 @@ T.cache('K',[],function () {
 			i = -1;
 			if (_s(a)) {
 				for (z = 0; z < a[A]; z++) {
-					if (K.equal(a[z], o)) {
+					if (a[z]===o) {
 						i = z;
 						break;
 					}
@@ -670,7 +666,7 @@ T.cache('K',[],function () {
 					n = v.firstChild;
 					while (n) {
 						m = n.nextSibling;
-						if (n.nodeType == 8 || (n.nodeType == 3 && !K.strTrim(n.nodeValue))) K.nodeDel(n);
+						if (n.nodeType == 8 || (n.nodeType == 3 && /^\s*$/.test(n.nodeValue))) K.nodeDel(n)
 						else K.nodeClean(n);
 						n = m
 					}
@@ -753,7 +749,7 @@ T.cache('K',[],function () {
 			/// <param name="e" type="Event">event object</param>
 			if ((o = K(o)) && (e = K.evt(e))) {
 				//e.halt();
-				K.clsPage();
+				K.clear();
 				//_c(e); why?
 				C=e.touches;
 				C=C?C[0]:Q;
@@ -762,31 +758,34 @@ T.cache('K',[],function () {
 				$v = r;
 				$w = h;
 				$x = o;
-				if(o.setCapture){
+				if(o.setCapture){//firefox4 support setCapture
 					I.f=U;
 					o.setCapture()
 				}
 				K.on(D, H, $o).on(D, I, $p).on(W, 'blur', $p).on(o, 'losecapture', $p).on(D, 'keydown', _c)
 			}
 		},
-		on: function (m, n, f, b, e, v,z,y) {
+		on: function (m, n, f, e, b, v,z,y) {
 			/// <summary>add DOM event listen</summary>
 			/// <param name="m" type="String|HTMLElement|Array">node or node ids</param>
 			/// <param name="n" type="String|Array">event name</param>
 			/// <param name="f" type="Function">listen method</param>
 			/// <returns type="K" />
+			//log(f);
 			if (_r(f)) {
 				m = _t(m) ? m : [m];
 				n=_s(n)?n:[n];
 				y=m[A];
+				e=!!e;
 				while (y--) {
 					v = K(m[y]);
+					//log(v);
 					if (v) {
 						z=n[A];
 						while(z--){
-							!e && (b ? K.arrRemove : K.arrInsert)(Y, [v, n[z], f]);
+							//!e && (b ? K.arrRemove : K.arrInsert)(Y, [v, n[z], f]);
 							if (v.addEventListener) {
-								b ? v.removeEventListener(n[z], f, V) : v.addEventListener(n[z], f, V)
+								b ? v.removeEventListener(n[z], f, e) : v.addEventListener(n[z], f, e)
 							} else if (v.attachEvent) {
 								b ? v.detachEvent(_w + n[z], f) : v.attachEvent(_w + n[z], f)
 							} else {
@@ -804,7 +803,7 @@ T.cache('K',[],function () {
 			/// <param name="n" type="String">event name</param>
 			/// <param name="f" type="Function">listen method</param>
 			/// <returns type="K" />
-			return K.on(m, n, f, U, e)
+			return K.on(m, n, f, e, U)
 		},
 		evt: function (e, w, c, i, f) {
 			/// <summary>get event object</summary>
@@ -826,14 +825,14 @@ T.cache('K',[],function () {
 			/// <param name="e" type="Event">event object</param>
 			/// <param name="w" type="Window">Window object</param>
 			e = K.evt(e, w);
-			if (e) e.stopPropagation ? e.stopPropagation() : e.cancelBubble = U
+			if (e) (e.t=e.stopPropagation) ? e.t() : e.cancelBubble = U
 		},
 		evtPrevent: function (e, w) {
 			/// <summary>prevent default</summary>
 			/// <param name="e" type="Event">event object</param>
 			/// <param name="w" type="Window">Window object</param>
 			e = K.evt(e, w);
-			if (e) e.preventDefault ? e.preventDefault() : e.returnValue = V
+			if (e) (e.t=e.preventDefault) ? e.t() : e.returnValue = V
 		},
 		evtPageXY: function (e, w, f, p, b) {
 			/// <summary>event page xy</summary>
@@ -873,7 +872,7 @@ T.cache('K',[],function () {
 			e=K.evt(e,w);
 			return e?((w=e.touches)&&w[A]==1)||e.which==1||(!e.which&&e.button==1):V
 		},
-		evtClean: function (m) {
+		/*evtClean: function (m) {
 			/// <summary>clean event cache</summary>
 			for (; m = Y.pop(); ) {
 				m.push(U);
@@ -881,7 +880,7 @@ T.cache('K',[],function () {
 				m[0] = Q
 			}
 			$j = Y = Q
-		},
+		},*/
 		run: function () {
 			/// <summary>run js file or code</summary>
 			$b = $b || new (K.JS);
@@ -913,20 +912,20 @@ T.cache('K',[],function () {
 			}
 			return r
 		},
-		lock: function (a,b) {
-			/// <summary>lock</summary>
-			/// <param name="a" type="Function">lock key</param>
-			/// <param name="b" type="Function">method</param>
+		lock: function (a,b) { 
+			/// <summary>lock</summary> 
+			/// <param name="a" type="Function">lock key</param> 
+			/// <param name="b" type="Function">method</param> 
 			if(!has.call(_d,a)){
 				_d[a]=b;
 				_r(b)&&b()
 			}
-		},
-		unlock: function (a) {
-			/// <summary>unlock</summary>
-			/// <param name="a" type="Function">lock key</param>
+		}, 
+		unlock: function (a) { 
+			/// <summary>unlock</summary> 
+			/// <param name="a" type="Function">lock key</param> 
 			delete _d[a];
-		},
+		}, 
 		XHR: K.clazz(K.Evt, {
 			send: function (p, b, o, m, t) {
 				/// <summary>send request</summary>
@@ -947,7 +946,7 @@ T.cache('K',[],function () {
 					async: U
 				}, p);
 				_k(o,{
-					_f: _h || (_h = function (s) { try { this.fail(s) } catch (e) { K.log(e, this.fail) } }),
+					_f: _h || (_h = function (s) { try { this.fail(s) } catch (e) { log(e, this.fail) } }),
 					_e: _i || (_i = function (s) { try { this.done(t.z) } catch (e) { s = e } this._f(s) })
 				});
 				o[F] = _k({ "Content-Type": "application/x-www-form-urlencoded" }, o[F]);
@@ -1021,7 +1020,7 @@ T.cache('K',[],function () {
 				T(t.w);
 				t.q=[];
 				t.c(U);
-				!f && t.fireEvt('end');
+				!f && t.fire('end');
 			}/*,
 			halt:function(f,t){
 				t=this;
@@ -1044,7 +1043,7 @@ T.cache('K',[],function () {
 							try {
 								b.l[i]()
 							} catch (e) {
-								K.log(e, b.l[i])
+								log(e, b.l[i])
 							}
 					}
 					$[p]=b;
@@ -1107,7 +1106,7 @@ T.cache('K',[],function () {
 						try {
 							t.c(t.g, t.o[3])
 						} catch (e) {
-							K.log(f = e, t.c)
+							log(f = e, t.c)
 						}
 						f && t.n()
 					});
@@ -1123,7 +1122,7 @@ T.cache('K',[],function () {
 					t.z.un(t.m);
 					delete t.m;
 				}
-				!f && t.fireEvt('end');
+				!f && t.fire('end');
 			}
 		}),
 		JS: K.clazz(K.Evt, {
@@ -1133,7 +1132,7 @@ T.cache('K',[],function () {
 				t.q || (t.q = []);
 				t.q.push(_k({
 					url:Q,//load url
-					code:Q,//exec code
+					code:Q,//exec code 
 					jsonp:Q,// jsonp call back name
 					start:_u,//start function
 					done:_u,//done function
@@ -1194,16 +1193,15 @@ T.cache('K',[],function () {
 								R(t.j, 50, V, t)
 							}
 						};
-						if(a.readyState)
-						t._ = R(f, 50, U);
+						if(a.readyState)t._ = R(f, 50, U);
 						a.onerror = a.onload = f;
-						a[o.code ? 'text' : 'src'] =o.code? o.code+';K("'+id+'").onload()':o.url+(o.x?[/\?/.test(o.url)?'&':'?',o.jsonp,'=K.JS.',o.x].join(''):'');
+						a[o.code ? 'text' : 'src'] =o.code? 'try{'+o.code+'}catch(e){}K("'+id+'").onload()':o.url+(o.x?[/\?/.test(o.url)?'&':'?',o.jsonp,'=K.JS.',o.x].join(''):'');
 						t.m.insertBefore(a,t.m.firstChild);
 						t.$=R(f,o.timeout,V,t,A);//time out
 					}
 				} else {
 					delete t.m;
-					t.fireEvt('end')
+					t.fire('end')
 				}
 			}
 		}),
@@ -1224,8 +1222,8 @@ T.cache('K',[],function () {
 				if (!has.call($G,$F)) {//not exist
 					G = d ? K.nodeVal(a) : a; //is node ,get value
 					G = K.strSwap(G,/\s+/g, ' '); //trim blank
-					if (G && c) {//exist templet and sub templet
-						G = G.match(new E(K.strFormat('<{0}>([\\s\\S]*?)</{0}>',c))); //get sub templet
+					if (G && c) {//exist templet and sub templet 
+						G = G.match(new E('<'+c+'>([\\s\\S]*?)</'+c+'>')); //get sub templet
 						if (!G) throw 'no tpl:' + c; //not exist
 						G = G[1]; //use sub templet
 					}
@@ -1236,21 +1234,21 @@ T.cache('K',[],function () {
 				/// <summary>get the filled string</summary>
 				/// <param name="d" type="Object">src data</param>
 				d=d||{};
-				try {
-					if (!has.call($G,$F)) {
-						a = { s: "var _=[];_.push('" + K.strSwap(G,
-							$K = $K || [/\s+/g,/<#/g,/;*#>/g,/\\(?=[^\r\n]*\n)/g,/\\/g,/\t/g, /'(?=[^\r\n]*\n)/g, /'/g, /\t/g, /\r=([^\n]+)\n/g, /\r/g, /\n/g, /([{;]);/g],
-							$L = $L || [" ", "\r", "\n","\t","\\\\","\\", "\t", "\\'", "'", "',$1,'", "');", ";_.push('", "$1"]) + "');return _.join('')" }
-						a.f = new Function(this.KEY, a.s);
-						$G[$F] = a
-					} else {
-						a = $G[$F]
-					}
-					G = '';
-					return a.f(d)
-				} catch (e) {
-					return ['ex:',e.message,'src:',K.strHTML(a.s)].join('');
+				if (!has.call($G,$F)) {
+					a = { s: "var _=[];_.push('" + K.strSwap(G,
+						$K = $K || [/\s+/g,/<#/g,/;*#>/g,/\\(?=[^\r\n]*\n)/g,/\\/g,/\t/g, /'(?=[^\r\n]*\n)/g, /'/g, /\t/g, /\r=([^\n]+)\n/g, /\r/g, /\n/g, /([{;]);/g], 
+						$L = $L || [" ", "\r", "\n","\t","\\\\","\\", "\t", "\\'", "'", "',$1,'", "');", ";_.push('", "$1"]) + "');return _.join('')" }
+					a.f = new Function(this.KEY, a.s);
+					$G[$F] = a
+				} else {
+					a = $G[$F]
 				}
+				try {
+					a=a.f(d)
+				} catch (e) {
+					a=['ex:',e.message,'src:',K.strHTML(a.s)].join('')
+				}
+				return a;
 			},
 			toFill: function (a, b) {
 				/// <summary>fill node</summary>
@@ -1261,5 +1259,5 @@ T.cache('K',[],function () {
 			KEY: 'ctx'
 		}
 	});
-	W.K = K.on(W, 'unload', K.evtClean)//;//.go()
+	W.K = K;//.on(W, 'unload', K.evtClean)//;//.go()
 });

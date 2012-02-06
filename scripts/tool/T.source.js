@@ -37,18 +37,16 @@
 			}
 		},
 		watchList=[],
-		$J={},
 		$R={},
 		$JCounter=0,
 		$RCounter=0,
-		$C={},
 		runWatch=function(f,i,j,o,y){
 			for(i=0;watchList[i];i++){
 				j=1;
 				o=watchList[i];
 				if(!ia(o[0]))o[0]=[o[0]];
 				for(y=0;o[0][y];y++){
-					if($J[o[0][y]]===U){
+					if(loader[o[0][y]]===U){
 						o[0].splice(y--,1);
 					}else{
 						j=0;
@@ -87,17 +85,17 @@
 			}
 		},
 		ready=function(f){
-			im(f)&&f();
+			im(f)&&tryRun(f);
 			return T;
 		},
 		WT=function(keys,m){m=this;m.k=keys||[];m.z=WT.i++;WT.$[m.z]=m;},
 		loader=function(param,uniqueKey,callback,isCode,a,f){
-			if (has.call($J,uniqueKey)) {//if exist in the cache
-				if($J[uniqueKey]===U){//if load succ
+			if (has.call(loader,uniqueKey)) {//if exist in the cache
+				if(loader[uniqueKey]===U){//if load succ
 					timer(WT.d,50,0,WT);
 				}
 			} else {
-				$J[uniqueKey] = noop;//push current callback to the list
+				loader[uniqueKey] = noop;//push current callback to the list
 				$JCounter++;
 				a = D.createElement('script')
 				a.type='text/javascript';
@@ -115,7 +113,8 @@
 				};
 				if(a.readyState)t._ = timer(f, 50, U);//opera load not exist file bug , use setInterval fix it 
 				a.onerror = a.onload = f;
-				a[isCode ? 'text' : 'src'] = param+(isCode?';document.getElementById("'+a.id+'").onload()':'');
+				if(isCode)a.text='try{('+param+'())}catch(e){}document.getElementById("'+a.id+'").onload()';
+				else a.src=param;
 				E.insertBefore(a,E.firstChild);
 			}
 		},
@@ -130,7 +129,8 @@
 		},
 		innerT={},
 		main=location.hostname,
-		xver=new Date().getTime().toString(32),
+		nowTime=new Date().getTime(),
+		xver=nowTime.toString(32),
 		store, engine,engines,cache;//control file versions name,storage prefix;
 	if(!T){//if not exist Ctrl
 		cache=getParam('che',curPath)=='true';//recognize need cache
@@ -186,9 +186,9 @@
 			}
 			//log('wt count:',m.c);
 			m._=f=$JCounter==$RCounter;
-			//log('$J',$JCounter,'$R',$RCounter,f);
-			/*for(p in $J){
-				if($J[p]!=U){
+			//log('loader',$JCounter,'$R',$RCounter,f);
+			/*for(p in loader){
+				if(loader[p]!=U){
 					WT._=f=U;
 					break;
 				}
@@ -206,13 +206,17 @@
 		n:function(k){
 			timer(function(){
 				if($R[k]!==U){
-					$J[k]=U;
+					loader[k]=U;
 					$R[k]=U;
 					$RCounter++;
 					//var a=[];
 					//for(var p in $R)a.push(p);
 					//log(a);
-					im(T.onload)&&T.onload(k,$R);
+					if(im(T.onload)){
+						tryRun(function(){
+							T.onload(k,$R);
+						});
+					}
 				}
 				WT.d(k);
 			},50);
@@ -240,7 +244,7 @@
 				j=m.k.length;
 				if(j){
 					for(i=0;i<j;i++){
-						if($J[m.k[i]]===U){
+						if(loader[m.k[i]]===U){
 							j--;
 							m.k.splice(i--,1);
 						}
@@ -317,7 +321,8 @@
 			},
 			del: function (key) {
 				store.load(key);
-				store.expires = new Date(315532799000).toUTCString();
+				//store.removeAttribute();
+				store.expires = nowTime.toUTCString();
 				store.save(key);
 			}
 		}
@@ -331,7 +336,7 @@
 			delete engine._;
 			break;
 		} else {
-			tengine = 0;
+			engine = 0;
 		}
 	}
 	if(!engine){
@@ -342,14 +347,14 @@
         }
     }
 	var vf,getContent=function(f,v,z,r){//get cache content
-		r=has.call($C,f)&&$C[f];
+		r=has.call(log,f)&&log[f];
 		if(!r){
 			v=engine.get(f);
 			if(v&&new RegExp('^'+getFileInfo(f).h+':').test(v)){
-				v.replace(depsReg,function(m,a){z=a;});
-				r={c:v.replace(verReg,''),d:z&&z.split(',')||[]};
+				z=v.match(depsReg);
+				r={c:v.replace(verReg,''),d:z&&z[1].split(',')||[]};
 			}
-			$C[f]=r;
+			log[f]=r;
 		}
 		return r;
 	},runOne=function(host,p,fn,temp){//run one file
@@ -358,18 +363,21 @@
 		host.a(p);
 		temp=getContent(p);
 		if(temp){
-			fn=function(){loader('('+temp.c+'())',p,function(){WT.n(p)},U)};
+			fn=function(){loader(temp.c,p,function(){WT.n(p)},U)};
 			runFiles(temp.d,fn);
 		}else{
-			loader(getFilePath(p),p,function(){if(!$C[p+'_'])timer(WT.n,50,0,WT,p)});
+			loader(getFilePath(p),p,function(){timer(function(){if(!log[p+'_'])WT.n(p)},50)});
 		}
 	},runFiles=function(p,f,wt,idx){//run more than one files
 		if(!ia(p))p=[p];
-		if(!p.length)return tryRun(f);
-		wt=new WT();
-		wt.f=function(){tryRun(f)};
-		for(idx=0;idx<p.length;idx++){
-			runOne(wt,p[idx]);
+		if(p.length){
+			wt=new WT();
+			wt.f=function(){tryRun(f)};
+			for(idx=0;idx<p.length;idx++){
+				runOne(wt,p[idx]);
+			}
+		}else{
+			tryRun(f);
 		}
 	},coreCallback=function(){//core file callback
 		T.coreReady=ready;
@@ -412,14 +420,14 @@
 		cache:function(key,dps,value,fn){
 			/// <param name="key" type="String">cache key,same as file name</param>
 			/// <param name="value" type="Function">cache content,is a function</param>
-			$C[key+'_']=U;
+			log[key+'_']=U;
 			if(!ia(dps))dps=[];
 			fn=WT.l(key,dps);
 			if(fn)throw new Error(fn+' @ '+key);
 			runFiles(dps,function(){
+				WT.n(key);
 				value(); //exec succ then cache it,avoid cache a error file and read it next time
 				cache&&engine.set(key, getFileInfo(key).h + ':['+dps+']@'+ value);
-				WT.n(key);
 			});
 		}
 	});
