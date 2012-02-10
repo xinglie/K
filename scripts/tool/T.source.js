@@ -65,9 +65,10 @@
 			runWatch(WT._);
 			return T
 		},
-		curPath=selfNode[selfNode.length-1].src,
-		rootPath=curPath.replace(/[^\?#&]+$/,'').replace(/[^\/]+$/,''),
-		coreList=getParam('k',curPath),
+		curScript=selfNode[selfNode.length-1],
+		rootPath=curScript.src.replace(/[^\?#&]+$/,'').replace(/[^\/]+$/,''),
+		scriptCfg=curScript.getAttribute("data-cfg"),
+		coreList=getParam('k',scriptCfg),
 		depsReg=/:\[([^\]]+)\]@/,
 		verReg=/^[^@]+@/,
 		scriptLoadedReg=/(?:4|d|te)$/,
@@ -133,11 +134,11 @@
 		xver=nowTime.toString(32),
 		store, engine,engines,cache;//control file versions name,storage prefix;
 	if(!T){//if not exist Ctrl
-		cache=getParam('che',curPath)=='true';//recognize need cache
+		cache=getParam('che',scriptCfg)=='true';//recognize need cache
 		mix(innerT,{
-			_M:getParam('fmt',curPath)||'#k.js?v=#v',//load js file format
-			_I:getParam('sis',curPath)=='true',//the period is path segmentation
-			_F:getParam('cfv',curPath)||xver
+			_M:getParam('fmt',scriptCfg)||'#k.js?v=#v',//load js file format
+			_I:getParam('sis',scriptCfg)=='true',//the period is path segmentation
+			_F:getParam('cfv',scriptCfg)||xver
 		});
 		W.T=T={//
 			using:function(p,f){//
