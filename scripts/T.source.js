@@ -12,7 +12,7 @@
 		im=function(a){return t.call(a)=='[object Function]'},//is method
 		has=OP.hasOwnProperty,
 		verFile = 'T.FVS',
-		selfNode=D.getElementsByTagName('script'),
+		scriptNodes=D.getElementsByTagName('script'),
 		log=function(){
 			var a=W.console,b=arguments;
 			if(a&&a.log){
@@ -65,8 +65,8 @@
 			runWatch(WT._);
 			return T
 		},
-		curScript=selfNode[selfNode.length-1],
-		rootPath=curScript.src.replace(/[^\?#&]+$/,'').replace(/[^\/]+$/,''),
+		curScript=scriptNodes[scriptNodes.length-1],
+		rootPath=curScript.src.replace(/[^\/]+$/,''),
 		scriptCfg=curScript.getAttribute("data-cfg"),
 		coreList=getParam('k',scriptCfg),
 		depsReg=/:\[([^\]]+)\]@/,

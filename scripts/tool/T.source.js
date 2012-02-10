@@ -12,14 +12,14 @@
 		im=function(a){return t.call(a)=='[object Function]'},//is method
 		has=OP.hasOwnProperty,
 		verFile = 'T.FVS',
-		selfNode=D.getElementsByTagName('script'),
+		scriptNodes=D.getElementsByTagName('script'),
 		log=function(){
 			var a=W.console,b=arguments;
 			if(a&&a.log){
 				a.log.apply?a.log.apply(a,b):a.log(s.call(b))
 			}
 		},
-		getParam=function(key,str,reg,r){//query form string
+		paramFrom=function(key,str,reg,r){//query form string
 			reg=new RegExp('(?:^|&)' + key + '=([^&]*)(?:&|$)','i');
 			r=str.match(reg);
 			return r?r[1]:'';
@@ -65,10 +65,10 @@
 			runWatch(WT._);
 			return T
 		},
-		curScript=selfNode[selfNode.length-1],
-		rootPath=curScript.src.replace(/[^\?#&]+$/,'').replace(/[^\/]+$/,''),
+		curScript=scriptNodes[scriptNodes.length-1],
+		rootPath=curScript.src.replace(/[^\/]+$/,''),
 		scriptCfg=curScript.getAttribute("data-cfg"),
-		coreList=getParam('k',scriptCfg),
+		coreList=paramFrom('k',scriptCfg),
 		depsReg=/:\[([^\]]+)\]@/,
 		verReg=/^[^@]+@/,
 		scriptLoadedReg=/(?:4|d|te)$/,
@@ -134,11 +134,11 @@
 		xver=nowTime.toString(32),
 		store, engine,engines,cache;//control file versions name,storage prefix;
 	if(!T){//if not exist Ctrl
-		cache=getParam('che',scriptCfg)=='true';//recognize need cache
+		cache=paramFrom('che',scriptCfg)=='true';//recognize need cache
 		mix(innerT,{
-			_M:getParam('fmt',scriptCfg)||'#k.js?v=#v',//load js file format
-			_I:getParam('sis',scriptCfg)=='true',//the period is path segmentation
-			_F:getParam('cfv',scriptCfg)||xver
+			_M:paramFrom('fmt',scriptCfg)||'#k.js?v=#v',//load js file format
+			_I:paramFrom('sis',scriptCfg)=='true',//the period is path segmentation
+			_F:paramFrom('cfv',scriptCfg)||xver
 		});
 		W.T=T={//
 			using:function(p,f){//
