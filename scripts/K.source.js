@@ -62,9 +62,9 @@ T.cache('K',[],function () {
 		return z
 	},
     $K,
-    $L,
+	$L,
     $b,
-    //$e,
+    $e,
     $g = /^[\s\xa0\u3000\uFEFF]+|[\s\xa0\u3000\uFEFF]+$/g,
     //$h = /([?|.{}\\()+\-*\/^$\[\]])/g,
     $o = function (g, c) {
@@ -74,7 +74,7 @@ T.cache('K',[],function () {
     	if (g) {
     		c = K.evtPageXY(g);
     		$u && $v($x, g, c.x - $t.x, c.y - $t.y, c);
-    		_c(g)
+    		//_c(g)
     	}
     },
     $p = function (e,f) {
@@ -83,10 +83,10 @@ T.cache('K',[],function () {
 		e=K.evt(e);
 		f=(e&&e.touches)||[];
 		if(!f[A]){
-			K.un(W, 'blur', $p).un(D, H, $o).un(D, I, $p).un($x, 'losecapture', $p).un(D, 'keydown', _c);
-			I.f && $x.releaseCapture();//firefox 4 support setCapture and releaseCapture but not as ie
+			K.un($e, 'blur', $p).un($z, H, $o).un($z, I, $p).un($x, 'losecapture', $p).un($z, 'keydown', _c);
+			I.f && $x.releaseCapture();
 			_r($w) && $w($x,e);
-			$x = Q;
+			$x = Q;$z=Q;$e=Q;
 			C = Q
 		}
     },
@@ -99,7 +99,7 @@ T.cache('K',[],function () {
     	return c * a / d + b
     },
     $t, $u, $v, $w, $x,
-    $y = !!W.getComputedStyle,
+    $y = !!W.getComputedStyle,$z,
     _c = function (e, w) {
     	/// <summary>cancel event bubble and default</summary>
     	/// <param name="e" type="Event">event object</param>
@@ -212,7 +212,7 @@ T.cache('K',[],function () {
 			/// <param name="s" type="String">src string</param>
 			/// <param name="r" type="String|RegExp">trim str or regexp</param>
 			/// <returns type="String" />
-			return K.strSwap(s,r||$g)
+			return (s+'').replace(r||$g,'')
 		},
 		/*strOwn: function (s,p) {
 			/// <summary>detect contains the str or regexp</summary>
@@ -225,7 +225,7 @@ T.cache('K',[],function () {
 			/// <summary>byte length</summary>
 			/// <param name="s" type="String">src length</param>
 			/// <returns type="Integer" />
-			return K.strSwap(s,/[^\x00-\xff]/g, _w)[A]
+			return (s+'').replace(/[^\x00-\xff]/g, _w)[A]
 		},
 		strCode: function (s,f) {
 			/// <summary>use encodeURIComponent or decodeURIComponent</summary>
@@ -234,7 +234,7 @@ T.cache('K',[],function () {
 			/// <returns type="String" />
 			return W[(f ? 'de' : 'en') + 'codeURIComponent'](s+'')
 		},
-		strSwap: function (s,p,v, b, i, l) {
+		/*strSwap: function (s,p,v, b, i, l) {
 			/// <summary>enhance replace</summary>
 			/// <param name="s" type="String">src string</param>
 			/// <param name="p" type="String|RegExp|Array">str,regexp or array</param>
@@ -248,7 +248,7 @@ T.cache('K',[],function () {
 				while (++i < p[A]) s = s.replace(p[i], b && i < v[A] ? v[i] : l ? '' : v)
 			} else s = s.replace(p, l ? '' : v);
 			return s
-		},
+		},*/
 		strFormat: function (s,d,a) {
 			/// <summary>format string ,can use {0} or {username}</summary>
 			/// <param name="s" type="String">src string</param>
@@ -262,12 +262,20 @@ T.cache('K',[],function () {
 			});
 			return s
 		},
-		strHTML:function(s,f){
+		strHTML:function(s,f,r,p){
 			/// <summary>encode or decode html string</summary>
 			/// <param name="s" type="String">src string</param>
 			/// <param name="f" type="Boolean">is decode</param>
 			/// <returns type="String" />
-			return K.strSwap(s ,f ? [/&lt;/g, /&gt;/g, /&quot;/g, /&amp;/g] : [/&/g, /"/g, /</g, />/g], f ? ['<', '>', '"', '&'] : ['&amp;', '&quot;', '&lt;', '&gt;']);
+			r=f ? [/&lt;/g, /&gt;/g, /&quot;/g, /&amp;/g]:
+					[/&/g, /"/g, /</g, />/g];
+			p=f ? ['<', '>', '"', '&'] :
+					['&amp;', '&quot;', '&lt;', '&gt;'];
+			s+='';
+			while(r.length){
+				s=s.replace(r.shift(),p.shift());
+			}
+			return s;
 		},
 		logTime: function (a) {
 			/// <summary>log time</summary>
@@ -644,7 +652,7 @@ T.cache('K',[],function () {
 				d && _k(d.style, c, function (x, y, o) {
 					if (y == 'opacity' && !$y) {
 						o.zoom = 1;
-						o.filter = K.strSwap(o.filter || '',/alpha\([^)]*\)/i) + (x == 1 ? '' : 'alpha(opacity=' + x * 100 + ')');
+						o.filter = (o.filter || '').replace(/alpha\([^)]*\)/i,'') + (x == 1 ? '' : 'alpha(opacity=' + x * 100 + ')');
 					} else if (y == 'float') {
 						o[_g] = x;
 						return V
@@ -716,7 +724,7 @@ T.cache('K',[],function () {
 				v=K(a[i]);
 				if(v){
 					d = v.className;
-					v.className = K.strTrim(c || e?K.strSwap(d, r, e?' '+c+' ':' '):d += r.test(d) ? '' : ' ' + b)
+					v.className = K.strTrim(c || e ? d.replace(r, e?' '+c+' ':' '):d += r.test(d) ? '' : ' ' + b)
 				}
 			}
 			return K
@@ -733,6 +741,14 @@ T.cache('K',[],function () {
 			}
 			return r
 		},
+		nodeWin:function(a,d,r){
+			r=Q;
+			d=K.nodeDoc(a);
+			if(d){
+				r=d.defaultView||d.parentWindow
+			}
+			return r;
+		},
 		mouseInout: function (a, e, w) {
 			/// <summary>judge mouse is in or out node a</summary>
 			/// <param name="e" type="Event">event object</param>
@@ -740,6 +756,17 @@ T.cache('K',[],function () {
 			/// <returns type="Boolean" />
 			e=K.evt(e,w);
 			return e ? !K.nodeIn(e.relatedTarget || e[(/out$/.test(e.type) ? 'to' : 'from') + 'Element'], a) : V
+		},
+		mouseHover:function(e,w,t){
+			e=K.evt(e,w);
+			//console.log(e);
+			t=K.evtTarget(e);
+			//console.log(t,e);
+			if(t&&t.setCapture){
+				t=K.nodeDoc(t).elementFromPoint(e.clientX,e.clientY);
+				while(t&&t.nodeType==3)t=t.parentNode;
+			}
+			return t;
 		},
 		startDrag: function (o, r, h, e) {
 			/// <summary>drag element,the element position is absolute</summary>
@@ -750,6 +777,7 @@ T.cache('K',[],function () {
 			if ((o = K(o)) && (e = K.evt(e))) {
 				//e.halt();
 				K.clear();
+				K.evtPrevent(e);
 				//_c(e); why?
 				C=e.touches;
 				C=C?C[0]:Q;
@@ -758,11 +786,13 @@ T.cache('K',[],function () {
 				$v = r;
 				$w = h;
 				$x = o;
+				$z = K.nodeDoc(o);
+				$e=K.nodeWin(o);
 				if(o.setCapture){//firefox4 support setCapture
 					I.f=U;
 					o.setCapture()
 				}
-				K.on(D, H, $o).on(D, I, $p).on(W, 'blur', $p).on(o, 'losecapture', $p).on(D, 'keydown', _c)
+				K.on($z, H, $o).on($z, I, $p).on($e, 'blur', $p).on(o, 'losecapture', $p).on($z, 'keydown', _c)
 			}
 		},
 		on: function (m, n, f, e, b, v,z,y) {
@@ -1206,13 +1236,13 @@ T.cache('K',[],function () {
 			}
 		}),
 		TP: {
-			fix: function (s, f) {
+			/*fix: function (s, f) {
 				/// <summary>fix</summary>
 				/// <param name="s" type="String">src string</param>
 				/// <param name="f" type="Boolean">ignore backslash</param>
 				/// <returns type="String" />
-				return K.strSwap(s,[new E("("+ (f ? "" : "\\\\|") + "')", "g"), /"/g], ['\\$1', '&quot;'])
-			},
+				return (s+'').replace(new E("("+ (f ? "" : "\\\\|") + "')", "g"),'\\$1').replace(/"/g, '&quot;')
+			},*/
 			using: function (a, c, b, d) {
 				/// <summary>using templet</summary>
 				/// <param name="a" type="String|HTMLElement">node or node id or src string</param>
@@ -1221,7 +1251,7 @@ T.cache('K',[],function () {
 				$F = [b, c].join('$'); //generate unique key to cache result
 				if (!has.call($G,$F)) {//not exist
 					G = d ? K.nodeVal(a) : a; //is node ,get value
-					G = K.strSwap(G,/\s+/g, ' '); //trim blank
+					G = G.replace(/\s+/g, ' '); //trim blank
 					if (G && c) {//exist templet and sub templet 
 						G = G.match(new E('<'+c+'>([\\s\\S]*?)</'+c+'>')); //get sub templet
 						if (!G) throw 'no tpl:' + c; //not exist
@@ -1230,23 +1260,32 @@ T.cache('K',[],function () {
 				}
 				return this
 			},
-			getFilled: function (d,a) {
+			getFilled: function (d,a,f) {
 				/// <summary>get the filled string</summary>
 				/// <param name="d" type="Object">src data</param>
 				d=d||{};
+				f=[];
+				$K=$K||/([\s\S]*?)(?:<#(=)?([\s\S]*?)#>|$)/g;
+				$L=$L||/([\\'])/g;
 				if (!has.call($G,$F)) {
-					a = { s: "var _=[];_.push('" + K.strSwap(G,
-						$K = $K || [/\s+/g,/<#/g,/;*#>/g,/\\(?=[^\r\n]*\n)/g,/\\/g,/\t/g, /'(?=[^\r\n]*\n)/g, /'/g, /\t/g, /\r=([^\n]+)\n/g, /\r/g, /\n/g, /([{;]);/g], 
-						$L = $L || [" ", "\r", "\n","\t","\\\\","\\", "\t", "\\'", "'", "',$1,'", "');", ";_.push('", "$1"]) + "');return _.join('')" }
-					a.f = new Function(this.KEY, a.s);
+					//console.log(G);
+					G.replace($K,function(m,a,b,c){
+						a&&f.push(';_.push(\'',a.replace($L,'\\$1'),'\');');
+						c&&f.push(b?';_.push(':'',c,b?');':'')
+					});
+					f.push('return _.join("")');
+					//console.log(f,f.join(''));
+					a = { s: f.join('') }
+					//a.f = new Function('_',a.s);
 					$G[$F] = a
 				} else {
 					a = $G[$F]
 				}
 				try {
-					a=a.f(d)
+					if(!a.f)a.f=new Function('_',a.s);
+					a=a.f.call(d,[])
 				} catch (e) {
-					a=['ex:',e.message,'src:',K.strHTML(a.s)].join('')
+					a=['ex:',e.message,',src:',K.strHTML(a.s)].join('')
 				}
 				return a;
 			},
@@ -1255,8 +1294,7 @@ T.cache('K',[],function () {
 				/// <param name="a" type="String|HTMLElement|Array">node or node ids</param>
 				/// <param name="b" type="Object">data</param>
 				K.nodeVal(a, this.getFilled(b))
-			},
-			KEY: 'ctx'
+			}
 		}
 	});
 	W.K = K;//.on(W, 'unload', K.evtClean)//;//.go()

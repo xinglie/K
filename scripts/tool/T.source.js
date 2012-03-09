@@ -12,7 +12,7 @@
 		im=function(a){return t.call(a)=='[object Function]'},//is method
 		has=OP.hasOwnProperty,
 		verFile = 'T.FVS',
-		scriptNodes=D.getElementsByTagName('script'),
+		//scriptNodes=D.getElementsByTagName('script'),
 		log=function(){
 			var a=W.console,b=arguments;
 			if(a&&a.log){
@@ -65,7 +65,7 @@
 			runWatch(WT._);
 			return T
 		},
-		curScript=scriptNodes[scriptNodes.length-1],
+		curScript=D.getElementById('t_js'),//scriptNodes[scriptNodes.length-1],
 		rootPath=curScript.src.replace(/[^\/]+$/,''),
 		scriptCfg=curScript.getAttribute("data-cfg"),
 		coreList=paramFrom('k',scriptCfg),
@@ -263,11 +263,13 @@
 			}
 		}
 	});
+	//window.WT=WT;
+	//window.loader=loader;
 	//set domain ,globalStorage need it, force the domain 
-	tryRun(function(){
+	/*tryRun(function(){
 		D.domain=main;
         D.domain=main.split('.').slice(-2).join('.');
-	});
+	});*/
 	engines = {//local storage engine
 		'0': {
 			_: function () {
@@ -284,7 +286,7 @@
 				store.removeItem(key);
 			}
 		},
-		'2': {
+		/*'2': {
 			_: function () {
 				store = W.globalStorage[D.domain];
 				return store;
@@ -298,7 +300,7 @@
 			del: function (key) {
 				store.removeItem(key);
 			}
-		},
+		},*/
 		'1': {
 			_: function () {
 				store = E;
@@ -360,7 +362,7 @@
 		return r;
 	},runOne=function(host,p,fn,temp){//run one file
 		//idx=p.lastIndexOf('/');
-		p=p.substring(p.lastIndexOf('/')+1);//depart the path and file
+		//p=p.substring(p.lastIndexOf('/')+1);//depart the path and file
 		host.a(p);
 		temp=getContent(p);
 		if(temp){
@@ -390,7 +392,7 @@
 	mix(T,{
 		Store:engine,
 		observe:watch,
-		DOMAIN:D.domain,
+		//:D.domain,
 		invoke:function(a,i,f,z){
 			if(ia(a)){
 				for(i=0;i<a.length;i++){
@@ -406,7 +408,7 @@
 			return f;
 		},
 		isCached:function(f,r,i,z){
-			r=getContent(f);
+			r=loader[f]||getContent(f);
 			if(r){
 				if(r.d&&r.d.length){
 					for(i=0;i<r.d.length;i++){
@@ -415,6 +417,8 @@
 					}
 				}
 				z=U;
+			}else{
+				z=!U;
 			}
 			return z;
 		},
