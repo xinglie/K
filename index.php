@@ -14,6 +14,14 @@
 </body>
 <?php include_once("scripts/T.single.inc") ?>
 <script type="text/javascript">
+T.allReady(function(){
+	console.log(arguments);
+	T.publish({
+		abc:function(){
+			
+		}
+	})
+});
 T.using('XY.Widget.Autocomplete',function(){
 	var ac=new XY.Widget.Autocomplete();
 	ac.show();
@@ -22,16 +30,21 @@ T.coreReady(function(){
 K.logTime('tmpl');
 //K.TP.using('haha->:\'\\\\adfadf\\\'"<#=this.abc#>;{;{;;};;<#=this.abc#>;;adfa<#for(var i=0;i<10;i++){#>a-><#if(i==0){#>aaa<#}#><#=i#>;;<#}#>;;adsfafdasdf</a-><a href="javascript:;" onclick="alert(K.nodeAttr(this,\'data-info\'));return false" data-info="<#=K.strHTML(this.bbb)#>"><#=K.strHTML(this.bbb)#></a>').toFill(document.body,{abc:'123',bbb:'x\'y\'z\\""><'});
 K.logTime('tmpl');
+K.on(document,'click',function(){
+	K.log(arguments);
+});
+K.on('drag','click',K.evtCancel);
 K.on('drag','mousedown',function(e){
 	var bound=K.nodeBound('drag');
 	K.startDrag('drag',function(o,e,fx,fy){
 		var nx=bound.x+fx;
 		var ny=bound.y+fy;
-		K.nodeStyle(o,{left:nx+'px',top:ny+'px'});
+		if(nx<500)nx=500;
+		//K.nodeStyle(o,{left:nx+'px',top:ny+'px'});
 	});
 	//K.evtPrevent(e);
 });
-K.object('XY');
+K.entity('XY');
 XY.Control=K.clazz(K.Evt,function(base,proto,clazz){
 	K.mix(clazz,{
 		registerControl:function(){
@@ -43,6 +56,9 @@ XY.Control=K.clazz(K.Evt,function(base,proto,clazz){
 	}
 });
 XY.Alert=K.clazz(XY.Control,{
+	hi:function(){
+		
+	}
 });
 
 

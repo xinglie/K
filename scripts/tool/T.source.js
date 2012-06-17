@@ -4,6 +4,7 @@
 */
 (function(W,D){
 	var E=D.documentElement,
+		EMPTY='',
 		T=W.T,
 		OP=Object.prototype,
 		t=OP.toString,
@@ -22,7 +23,7 @@
 		paramFrom=function(key,str,reg,r){//query form string
 			reg=new RegExp('(?:^|&)' + key + '=([^&]*)(?:&|$)','i');
 			r=str.match(reg);
-			return r?r[1]:'';
+			return r?r[1]:EMPTY;
 		},
 		noop=function(){
 		},
@@ -66,12 +67,15 @@
 			return T
 		},
 		curScript=D.getElementById('t_js'),//scriptNodes[scriptNodes.length-1],
-		rootPath=curScript.src.replace(/[^\/]+$/,''),
+		rootPath=curScript.src.replace(/[^\/]+$/,EMPTY),
 		scriptCfg=curScript.getAttribute("data-cfg"),
 		coreList=paramFrom('k',scriptCfg),
 		depsReg=/:\[([^\]]+)\]@/,
 		verReg=/^[^@]+@/,
 		scriptLoadedReg=/(?:4|d|te)$/,
+		jsCssReg=/\.(?:js|css)$/i,
+		cssReg=/\.css$/i,
+		//levelReg=/\.[^\.]*$/,
 		U=true,
 		timer=function(f, t, b, g, a,z){//wrap timer
 			a = s.call(arguments, 4);
@@ -80,63 +84,163 @@
 			z=function(){f.apply(g,a)};
 			return b ? W.setInterval(z,t) : W.setTimeout(z,t)
 		},
+		clsTimer=function(a){
+			W.clearInterval(a);
+			
+			W.clearTimeout(a);
+		},
 		mix=function(a,b,p){
 			for(p in b){
 				a[p]=b[p]
 			}
+			return a;
 		},
 		ready=function(f){
 			im(f)&&tryRun(f);
 			return T;
 		},
 		WT=function(keys,m){m=this;m.k=keys||[];m.z=WT.i++;WT.$[m.z]=m;},
-		loader=function(param,uniqueKey,callback,isCode,a,f){
+		
+		loader=function(param,uniqueKey,callback,isCode,isCss,isOuter,nodeId,tId,callCb,head,em,tmer,cb,ttmer){
+			tId=isCode?'K'+(nowTime++):param
+			if(!uniqueKey)uniqueKey=tId;
+			if(!nodeId)nodeId=tId;
+
 			if (has.call(loader,uniqueKey)) {//if exist in the cache
 				if(loader[uniqueKey]===U){//if load succ
-					timer(WT.d,50,0,WT);
+					//timer(callback);//
+					isOuter?timer(callback):timer(WT.d,50,0,WT);
+				}else if(isOuter){
+					loader[uniqueKey].push(callback);
 				}
 			} else {
-				loader[uniqueKey] = noop;//push current callback to the list
+				loader[uniqueKey]=isOuter?[callback]:noop;//push current callback to the list
 				$JCounter++;
-				a = D.createElement('script')
-				a.type='text/javascript';
-				a.defer='defer';
-				a.charset='UTF-8';
-				a.id='r_s_k_'+(WT.i++);
-				a.async=U;
-				f = function () {
-					if (scriptLoadedReg.test(a.readyState)) {
-						clearInterval(t._);
-						a.onerror = a.onload = null;
-						E.removeChild(a);
+				head=D.getElementsByTagName('head');
+				head=head?head[0]:E;
+				callCb=function(){
+					if(isOuter){
+						while(loader[uniqueKey].length){
+							timer(loader[uniqueKey].shift());
+						}
+					}else{
 						timer(callback);
 					}
 				};
-				if(a.readyState)t._ = timer(f, 50, U);//opera load not exist file bug , use setInterval fix it 
-				a.onerror = a.onload = f;
-				if(isCode)a.text='try{('+param+'())}catch(e){}document.getElementById("'+a.id+'").onload()';
-				else a.src=param;
-				E.insertBefore(a,E.firstChild);
+				if(isCss){
+					em=D.getElementById(nodeId);
+					em&&head.removeChild(em);
+					if(isCode){
+						em=D.createElement('style');
+						em.type='text/css';
+						em.id=nodeId;
+						if(em.styleSheet){
+							em.styleSheet.cssText=param;
+						}else{
+							em.innerHTML=param;
+						}
+						head.insertBefore(em,null);
+						log(em);
+					}else{
+						
+						em=D.createElement('link');
+						em.type='text/css';
+						em.charset='UTF-8';
+						em.rel='stylesheet';
+						em.id=nodeId;
+						em.href=param;
+						head.insertBefore(em,null);
+						//log(em.sheet);
+					}
+
+					cb=function(){
+						clsTimer(tmer);
+						clsTimer(ttmer);
+						callCb();
+						loader[uniqueKey]=U;
+					};
+					tmer=timer(function(){
+						//log('try');
+						try{
+							//log(em.styleSheet,em.sheet.cssRule);
+							if(em.styleSheet||em.sheet){
+								cb();
+							}
+						}catch(e){
+							//log(e);
+							cb();
+						}
+					},50,1);
+					ttmer=timer(cb,3E4,0,cb,U);
+					
+				}else{
+					em = D.createElement('script')
+					em.type='text/javascript';
+					em.defer='defer';
+					em.charset='UTF-8';
+					em.id=nodeId;
+					em.async=U;
+					cb = function (f) {
+						if (f===U||scriptLoadedReg.test(em.readyState)) {
+							clsTimer(tmer);
+							clsTimer(ttmer);
+							em.onerror = em.onload = null;
+							//log(em,em.href);
+							head.removeChild(em);
+							callCb();
+						}
+					};
+					ttmer=timer(cb,3E4,0,cb,U);
+					if(em.readyState)tmer= timer(cb, 50, U);//opera load not exist file bug , use setInterval fix it 
+					em.onerror = em.onload = cb;
+					if(isCode)em.text='try{'+param+'}catch(e){T.log(e)}document.getElementById("'+nodeId+'").onload()';
+					else em.src=param;
+					head.insertBefore(em,null);
+				}
+
+				
 			}
 		},
-		getFileInfo=function(f,r){
-			if(f==verFile)r={h:innerT._F};
-			return r||innerT._V&&innerT._V[f]||{h:xver};
+		getFileInfo=function(f,r,v,s,t){
+			s=cssReg.test(f);
+			f=f.replace(jsCssReg,'');
+
+			if(f==verFile)r={h:innerT._F,f:f};
+			t={f:f};
+
+			v=innerT._V;
+			if(v&&v.J&&v.S){
+				if(!s&&v.J[f]&&v.S[f]){
+					throw 'file:'+f+' discrepancy';
+				}
+				if(!v.J[f]&&!v.S[f]){
+					log('not found:'+f);
+					r=t;
+				}
+				if(!r){
+					r=s?v.S[f]:v.J[f]||(s=U,v.S[f]);
+					if(s)r.s=s;
+					r.f=f;
+				}
+			}
+			return r||t;
 		},
-		getFilePath=function(f,v){
-			v=getFileInfo(f);
-			if(innerT._I&&f!=verFile)f=f.replace(/\./g,'/');
-			return (v.p||rootPath)+(innerT._M.replace(/#k/g,f).replace(/#v/g,v.h||xver));
+		getFilePath=function(i,v,m){			
+			v=i||getFileInfo(f);
+			if(innerT._I&&f!=verFile)v.f=v.f.replace(/\./g,'/');
+			m=v.s?innerT._S:innerT._M;
+			return (v.p||rootPath)+(m.replace(/#k/g,v.f).replace(/#v/g,v.h||xver));
 		},
 		innerT={},
-		main=location.hostname,
-		nowTime=new Date().getTime(),
+		//main=location.hostname,
+		nowTime=new Date().valueOf(),
 		xver=nowTime.toString(32),
 		store, engine,engines,cache;//control file versions name,storage prefix;
 	if(!T){//if not exist Ctrl
 		cache=paramFrom('che',scriptCfg)=='true';//recognize need cache
 		mix(innerT,{
-			_M:paramFrom('fmt',scriptCfg)||'#k.js?v=#v',//load js file format
+			_M:paramFrom('js_fmt',scriptCfg)||'#k.js?v=#v.js',//load js file format
+			_S:paramFrom('css_fmt',scriptCfg)||'#k.css?v=#v.css',
 			_I:paramFrom('sis',scriptCfg)=='true',//the period is path segmentation
 			_F:paramFrom('cfv',scriptCfg)||xver
 		});
@@ -167,12 +271,6 @@
 			watchList=watchList.concat(T.$w);
 			delete T.$w;
 		}
-		for(cache in T){
-			if(/^_[MIF]$/.test(cache)){
-				innerT[cache]=T[cache];
-				delete T[cache];
-			}
-		}
 		cache=T.cache;
 	}
 	mix(WT,{
@@ -181,7 +279,7 @@
 		L:{},
 		d:function(m,p,k,f){
 			m=this;
-			for(p in m.$){
+			for(p in m.$){//m.$ keep the entities of WT
 				//log(p);
 				m.$[p].r()
 			}
@@ -204,9 +302,9 @@
 				}
 			}
 		},
-		n:function(k){
+		n:function(k){//notify one ready
 			timer(function(){
-				if($R[k]!==U){
+				if($R[k]!==U){//$R save how many files loaded
 					loader[k]=U;
 					$R[k]=U;
 					$RCounter++;
@@ -222,17 +320,17 @@
 				WT.d(k);
 			},50);
 		},
-		l:function(key,values,pu,arr,idx,tKey,tV){
-			if(!ia(WT.L[key]))WT.L[key]=[];
+		l:function(key,values,pu,arr,idx,tKey,tV){//check circle reference
+			if(!ia(WT.L[key]))WT.L[key]=[];//save key depend list
 			arr=[];
-			if(ia(values)){
-				if(!pu)WT.L[key]=WT.L[key].concat(values);
-				for(idx=0;idx<values.length;idx++){
-					tKey=values[idx];
-					if(tKey==key){
-						arr.push(key);
+			if(ia(values)){//is array
+				if(!pu)WT.L[key]=WT.L[key].concat(values);//save the key depends
+				for(idx=0;idx<values.length;idx++){//test depend
+					tKey=values[idx];//
+					if(tKey==key){//find same
+						arr.push(key);//push
 					}else{
-						tV=WT.l(key,WT.L[tKey],U);
+						tV=WT.l(key,WT.L[tKey],U);//test next key
 						if(tV)arr.push(tKey,tV);
 					}
 				}
@@ -243,8 +341,9 @@
 			r:function(m,i,j){
 				m=this;
 				j=m.k.length;
-				if(j){
+				if(j){//if !j the list of current depend is ready
 					for(i=0;i<j;i++){
+						//log(m.k,loader[m.k[i]]);
 						if(loader[m.k[i]]===U){
 							j--;
 							m.k.splice(i--,1);
@@ -350,26 +449,27 @@
         }
     }
 	var vf,getContent=function(f,v,z,r){//get cache content
-		r=has.call(log,f)&&log[f];
+		r=has.call(paramFrom,f)&&paramFrom[f];
 		if(!r){
 			v=engine.get(f);
 			if(v&&new RegExp('^'+getFileInfo(f).h+':').test(v)){
 				z=v.match(depsReg);
 				r={c:v.replace(verReg,''),d:z&&z[1].split(',')||[]};
 			}
-			log[f]=r;
+			paramFrom[f]=r;
 		}
 		return r;
-	},runOne=function(host,p,fn,temp){//run one file
+	},runOne=function(host,p,fn,temp,info){//run one file
 		//idx=p.lastIndexOf('/');
 		//p=p.substring(p.lastIndexOf('/')+1);//depart the path and file
 		host.a(p);
 		temp=getContent(p);
+		info=getFileInfo(p);
 		if(temp){
-			fn=function(){loader(temp.c,p,function(){WT.n(p)},U)};
+			fn=function(){loader('('+temp.c+'())',p,function(){WT.n(p)},U)};
 			runFiles(temp.d,fn);
 		}else{
-			loader(getFilePath(p),p,function(){timer(function(){if(!log[p+'_'])WT.n(p)},50)});
+			loader(getFilePath(info),p,function(){timer(function(){if(!mix[p])WT.n(p)},50)},0,info.s);//!mix see cache if not set ,not call cache method
 		}
 	},runFiles=function(p,f,wt,idx){//run more than one files
 		if(!ia(p))p=[p];
@@ -392,6 +492,7 @@
 	mix(T,{
 		Store:engine,
 		observe:watch,
+		log:log,
 		//:D.domain,
 		invoke:function(a,i,f,z){
 			if(ia(a)){
@@ -425,20 +526,37 @@
 		cache:function(key,dps,value,fn){
 			/// <param name="key" type="String">cache key,same as file name</param>
 			/// <param name="value" type="Function">cache content,is a function</param>
-			log[key+'_']=U;
+			mix[key]=U;
 			if(!ia(dps))dps=[];
 			fn=WT.l(key,dps);
 			if(fn)throw new Error(fn+' @ '+key);
+			//log(dps);
 			runFiles(dps,function(){
 				WT.n(key);
 				value(); //exec succ then cache it,avoid cache a error file and read it next time
 				cache&&engine.set(key, getFileInfo(key).h + ':['+dps+']@'+ value);
 			});
+		},
+		load:function(ops,df){
+			df=mix({
+				type:'css',
+				url:EMPTY,
+				code:EMPTY,
+				id:EMPTY,
+				done:noop
+			},ops);//loader=function(param,uniqueKey,callback,isCode,isCss,isOuter,callCb,head,em,tmer,cb,ttmer){
+			loader(df.url||df.code,EMPTY,df.noop,df.code,df.type=='css',U,df.id);
 		}
 	});
 	/*startup*/
-	runFiles(verFile,function(){
+	runFiles(verFile,function(c){
 		innerT._V=T._V;
+		for(c in T){
+			if(/^_[MIFVS]$/.test(c)){
+				innerT[c]=T[c];
+				if(cache)delete T[c];
+			}
+		}
 		//delete T._V; //if hide more info then delete it
 		runFiles(coreList&&coreList.split(',')||[],coreCallback);
 		T.using=function(p,f){

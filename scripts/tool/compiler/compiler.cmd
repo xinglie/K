@@ -27,7 +27,7 @@ if not exist "%JAVA_HOME%\bin\native2ascii.exe" goto NoJavaHome
 REM 生成压缩后的文件名，规则为：
 REM 1. 文件名有.source时: filename.source.js -> filename.js
 REM 2. 其它情况：filename.js -> filename-min.js
-set RESULT_FILE=%~n1-min%~x1
+set RESULT_FILE=%~p1%~n1-min%~x1
 dir /b "%~f1" | find ".source." > nul
 if %ERRORLEVEL% == 0 (
     for %%a in ("%~n1") do (

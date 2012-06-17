@@ -1,5 +1,6 @@
-T.cache('XY.Widget.Autocomplete',['XY.Widget.Base'],function(){
-	var Wgt=K.object('XY.Widget');
+T.cache('XY.Widget.Autocomplete',['XY.Widget.Base','edit_area.css'],function(key){
+	K.log('from:',arguments);
+	var Wgt=K.entity('XY.Widget');
 	Wgt.Autocomplete=K.clazz(XY.Widget.Base,function(base){
 		return {
 			ctor:function(){

@@ -1,5 +1,5 @@
-T.cache('XY.Widget.Base',['K'],function(){
-	var Wgt=K.object('XY.Widget');
+T.cache('XY.Widget.Base',['K'],function(key,root){
+	var Wgt=K.entity('XY.Widget');
 	Wgt.Base=K.clazz(K.Evt,{
 		ctor:function(){
 			K.log('base ctor');

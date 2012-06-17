@@ -23,12 +23,23 @@ try {
 			renderVerFile:'T.FVS.js',//输出的文件版本控制文件
 			renderVerSourceFile:'T.FVS.source.js',//
 			sourceSuffixReg:/\.source\.js$/i,
+			suffixReg:{
+				js:{
+					source:/\.source\.js$/i,
+					release:/\.js$/i
+				},
+				css:{
+					source:/\.css$/i,
+					release:/\.css$/i
+				}
+			},
 			//packedFolderRoot:'../',//从哪个文件夹下进行打包
 			packedFolders:[],//要打包的文件夹  自动添加当前目录下的父目录
 			ignoreFolders:[],//只能忽略打包文件夹中的子文件夹 自动添加当前目录 不打包工具目录
 			segIsSign:false,//路径分割符是不圆点
 			isDev:args.length&&args(0)=='true',//是不是按开发版本输出
-			fileFormat:'#k.js?v=#v',
+			jsFileFormat:'#k.js?v=#v.js',
+			cssFileFormat:'#k.css?v=#v.css',
 			coreLibFile:'',
 			verCtrlFileTmpl:'',
 			bootstrapTmpl:'',
@@ -102,26 +113,34 @@ try {
 				if(folder+''==parentFolder)return'';
 				return (file+'').replace(new RegExp(dr.replace(/\\/g,'\\\\')),'').replace(/\\/g,'/').replace(file.Name,'');
 			},
-			walkFolder:function(folder,refArray,refInfo){//遍历目录下的所有js文件
+			walkFolder:function(folder,suffix,refArray,refInfo){//遍历目录下的所有js文件
 				//WScript.Echo(folder);
-				var files=new Enumerator(fso.GetFolder(folder).Files),file,hash,path;
+				var files=new Enumerator(fso.GetFolder(folder).Files),
+					suffixInfo=cfg.suffixReg[suffix],
+					file,
+					hash,
+					path;
 				for(;!files.atEnd();files.moveNext()){
 					//WScript.Echo(files.item());
 					file=fso.GetFile(files.item());
-					if(file.Name&& /\.js$/i.test(file.Name) && file.Name != selfName &&cfg.coreFile!=file.Name&&cfg.renderVerFile!=file.Name){
-						if(cfg.isDev&&cfg.sourceSuffixReg.test(file.Name)){
-							WScript.Echo('process file:'+file.Name);
-							path=cfg.getFilePathRDR(file);
-							if(path){
-								path='p:"'+path+'"';
-								refArray.push('"'+ refInfo.folder+file.Name.replace(/\.source\.js$/i,'') + '":{'+path+'}');
+					if(file.Name&& file.Name != selfName &&cfg.coreFile!=file.Name&&cfg.renderVerFile!=file.Name){
+						if(cfg.isDev){
+							if(suffixInfo.source.test(file.Name)){
+								WScript.Echo('process file:'+file.Name);
+								path=cfg.getFilePathRDR(file);
+								if(path)path='p:"'+path+'"';
+								//hash='-';
+								refArray.push('"'+refInfo.folder+file.Name.replace(suffixInfo.source,'')+'":{'+path+'}');
 							}
-						}else if(!cfg.isDev&&!cfg.sourceSuffixReg.test(file.Name)){
-							WScript.Echo('process file:'+file.Name);
-							hash=cfg.getFileMd5(file);
-							path=cfg.getFilePathRDR(file);
-							if(path)path=',p:"'+path+'"';
-							refArray.push('"'+ refInfo.folder+file.Name.replace(/\.js$/i,'') + '":{h:"' + hash+ '"'+path+'}');
+						}else{
+							if(suffixInfo.release.test(file.Name)&&!cfg.suffixReg.js.source.test(file.Name)){
+								WScript.Echo('process file:'+file.Name);
+								//WScript.StdIn.ReadLine();
+								hash=cfg.getFileMd5(file);
+								path=cfg.getFilePathRDR(file);
+								if(path)path=',p:"'+path+'"';
+								refArray.push('"'+refInfo.folder+file.Name.replace(suffixInfo.release,'')+'":{h:"' + hash+ '"'+path+'}');
+							}
 						}
 					}
 				}
@@ -161,9 +180,14 @@ try {
 						}
 					}
 				},
-				loadFileFormat:function(v){
+				loadJSFileFormat:function(v){
 					if(v){
-						cfg.fileFormat=v.replace(/#filename#/g,'#k').replace(/#filehash#/g,'#v');
+						cfg.jsFileFormat=v.replace(/#filename#/g,'#k').replace(/#filehash#/g,'#v');
+					}
+				},
+				loadCSSFileFormat:function(v){
+					if(v){
+						cfg.cssFileFormat=v.replace(/#filename#/g,'#k').replace(/#filehash#/g,'#v');
 					}
 				},
 				renderBootstrapPath:function(v){
@@ -205,7 +229,7 @@ try {
 						}
 					}
 				}
-				if(cfg.isDev)cfg.fileFormat=cfg.fileFormat.replace(/#k/g,'#k.source');
+				if(cfg.isDev)cfg.jsFileFormat=cfg.jsFileFormat.replace(/#k/g,'#k.source');
 			},
 			processWatch:function(){//处理监视的文件
 				for(var i=0;i<cfg.watchChanged.length;i++){
@@ -215,16 +239,17 @@ try {
 						var tFile=fso.GetFile(parentFolderSeg+cfg.watchChanged[i]);
 						file=fso.GetFile(folderSeg+cfg.watchChanged[i]);
 						//WScript.Echo([file.Name,file.DateLastModified!=tFile.DateLastModified]);
+						//WScript.Echo(cfg.getFileMd5(file),cfg.getFileMd5(tFile));
 						if(cfg.getFileMd5(file)!=cfg.getFileMd5(tFile)){
 							fso.CopyFile(folderSeg+cfg.watchChanged[i],parentFolderSeg+cfg.watchChanged[i]);
 						}
 					}
 				}
 			},
-			processPacked:function(){//开始打包
+			processPacked:function(type){//开始打包
 				for(var idx=0,arr=[],info={};idx<cfg.packedFolders.length;idx++){
 					info.folder='';
-					cfg.walkFolder(cfg.packedFolders[idx],arr,info);
+					cfg.walkFolder(cfg.packedFolders[idx],type,arr,info);
 				}
 				return arr;
 			}
@@ -247,13 +272,16 @@ try {
 		cfg.processWatch();
 		// start 处理父目录及要打包的目录的js文件
 		WScript.Echo('start process packed files');
-		var arr=cfg.processPacked(),
-			list=arr.join(','),
-			verFileHash=md5(list),
+		var jsArr=cfg.processPacked('js'),
+			jsList=jsArr.join(','),
+			cssArr=cfg.processPacked('css'),
+			cssList=cssArr.join(','),
+			verFileHash=md5(jsList+cssList),
 			tempHash,tmpl=cfg.getFileContent(folderSeg+ cfg.hostTemplateFile);
 		cfg.writeFile(parentFolderSeg + cfg.renderHostFile,tmpl.replace(/<#=cache#>/g,!cfg.isDev)
 						  .replace(/<#=sign_is_seg#>/g,cfg.segIsSign)
-						  .replace(/<#=url_format#>/g,cfg.fileFormat)
+						  .replace(/<#=js_url_format#>/g,cfg.jsFileFormat)
+						  .replace(/<#=css_url_format#>/g,cfg.cssFileFormat)
 			              .replace(/<#=file_ver#>/g,verFileHash)
 						  .replace(/[\r\n\t]/g,'')
 						  .replace(/;}/g,'}'));
@@ -261,7 +289,8 @@ try {
 		//生成版本控制文件，核心!!
 		tmpl=cfg.verCtrlFileTmpl;//cfg.getFileContent(folderSeg+ cfg.verTemplateFile);
 		cfg.writeFile(parentFolderSeg+ cfg.renderVerFile,tmpl
-						  .replace(/<#=vers#>/g,list));
+						  .replace(/<#=js_vers#>/g,jsList)
+						  .replace(/<#=css_vers#>/g,cssList));
 
 		fso.CopyFile(parentFolderSeg+ cfg.renderVerFile,parentFolderSeg+ cfg.renderVerSourceFile);
 
@@ -285,7 +314,8 @@ try {
 		cfg.writeFile(parentFolderSeg+ cfg.renderSingleBootFile,tmpl.replace(/<#=cache#>/g,!cfg.isDev)
 						  .replace(/<#=sign_is_seg#>/g,cfg.segIsSign)
 						  .replace(/<#=render_bootstrap_path#>/g,cfg.renderBootstrapPath)
-						  .replace(/<#=url_format#>/g,cfg.fileFormat)
+						  .replace(/<#=js_url_format#>/g,cfg.jsFileFormat)
+						  .replace(/<#=css_url_format#>/g,cfg.cssFileFormat)
 						  .replace(/<#=boot_ver#>/g,tempHash)
 						  .replace(/<#=file_ver#>/g, verFileHash)
 						  .replace(/<#=core_lib_file#>/,cfg.coreLibFile)
