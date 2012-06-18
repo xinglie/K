@@ -5,6 +5,7 @@ T.cache('K', [], function() {
 	*/
 	var EMPTY='',
 		I50,
+		startWidthNum=/^\d/,
 		W = window,
 		A = 'length',
 		B = 'object',
@@ -1251,7 +1252,7 @@ T.cache('K', [], function() {
 				/// <summary>using templet</summary>
 				/// <param name="a" type="String|HTMLElement">node or node id or src string</param>
 				/// <param name="c" type="String">sub templet key</param>
-				b = (d = K(a)) ? a : _t[a] || (_t[a] = K.id()); //if node get node id as key else generate one
+				b = (d = K(a)) ? a : _t[a] || (_t[a] = K.guid()); //if node get node id as key else generate one
 				$F = [b, c].join('$'); //generate unique key to cache result
 				if (!has.call($G, $F)) { //not exist
 					G = d ? K.nodeVal(a) : a; //is node ,get value
@@ -1274,23 +1275,25 @@ T.cache('K', [], function() {
 				if (!has.call($G, $F)) {
 					//console.log(G);
 					G.replace($K, function(m, a, b, c) {
-						a && f.push(';_.push(\'', a.replace($L, '\\$1'), '\');');
-						c && f.push(b ? ';_.push(' : EMPTY, c, b ? ');' : EMPTY)
+						a && f.push(";_.push('", a.replace($L, '\\$1'), "');");
+						c && f.push(b ? ';_.push(' : EMPTY, c, b ? ');' : EMPTY);
 					});
-					f.push('return _.join("")');
+					f.push(';return _.join("")');
 					//console.log(f,f.join(EMPTY));
 					a = {
 						s: f.join(EMPTY)
 					}
+					//log(a.s);
 					//a.f = new Function('_',a.s);
 					$G[$F] = a
 				} else {
 					a = $G[$F]
 				}
 				try {
-					if (!a.f) a.f = new Function('_', a.s);
-					a = a.f.call(d, [])
+					if (!a.f) a.f = new Function('_',this.KEY, a.s);
+					a = a.f([],d)
 				} catch (e) {
+					log(e);
 					a = ['ex:', e.message, ',src:', K.strHTML(a.s)].join(EMPTY)
 				}
 				return a;
@@ -1300,7 +1303,8 @@ T.cache('K', [], function() {
 				/// <param name="a" type="String|HTMLElement|Array">node or node ids</param>
 				/// <param name="b" type="Object">data</param>
 				K.nodeVal(a, this.getFilled(b))
-			}
+			},
+			KEY:'ctx'
 		}
 	});
 	W.K = K; //.on(W, 'unload', K.evtClean)//;//.go()
