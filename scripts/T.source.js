@@ -31,7 +31,7 @@
 			if(!ia(f))f=[f];
 			for(i=0;i<f.length;i++){
 				try{
-					f[i]();
+					im(f[i])&&f[i]();
 				}catch(e){
 					log(e,f[i]);
 				}
@@ -72,7 +72,7 @@
 		coreList=paramFrom('k',scriptCfg),
 		depsReg=/:\[([^\]]+)\]@/,
 		verReg=/^[^@]+@/,
-		scriptLoadedReg=/(?:4|d|te)$/,
+		resLoadedReg=/(?:4|d|te)$/,
 		jsCssReg=/\.(?:js|css)$/i,
 		cssReg=/\.css$/i,
 		//levelReg=/\.[^\.]*$/,
@@ -101,11 +101,12 @@
 		},
 		WT=function(keys,m){m=this;m.k=keys||[];m.z=WT.i++;WT.$[m.z]=m;},
 		
-		loader=function(param,uniqueKey,callback,isCode,isCss,isOuter,nodeId,tId,callCb,head,em,tmer,cb,ttmer){
+		loader=function(param,uniqueKey,callback,isCode,isCss,isOuter,nodeId,tId,callCb,head,em,tmer,cb,ttmer,preEm){
 			tId=isCode?'K'+(nowTime++):param
 			if(!uniqueKey)uniqueKey=tId;
 			if(!nodeId)nodeId=tId;
 
+			//T.log(isOuter,has.call(loader,uniqueKey));
 			if (has.call(loader,uniqueKey)) {//if exist in the cache
 				if(loader[uniqueKey]===U){//if load succ
 					//timer(callback);//
@@ -116,9 +117,11 @@
 			} else {
 				loader[uniqueKey]=isOuter?[callback]:noop;//push current callback to the list
 				$JCounter++;
-				head=D.getElementsByTagName('head');
-				head=head?head[0]:E;
+				head=D.getElementsByTagName('head')[0];
+				head=head?head:E;
+				//log('qyu',isOuter,uniqueKey,loader[uniqueKey],isOuter?[callback]:noop);
 				callCb=function(){
+					//log(uniqueKey,loader[uniqueKey]);
 					if(isOuter){
 						while(loader[uniqueKey].length){
 							timer(loader[uniqueKey].shift());
@@ -128,60 +131,70 @@
 					}
 				};
 				if(isCss){
-					em=D.getElementById(nodeId);
-					em&&head.removeChild(em);
+					preEm=D.getElementById(nodeId);
+					if(preEm){
+						preEm.id=EMPTY;
+					}
+					//T.log('start new em');
 					if(isCode){
 						em=D.createElement('style');
-						em.type='text/css';
-						em.id=nodeId;
 						if(em.styleSheet){
 							em.styleSheet.cssText=param;
 						}else{
 							em.innerHTML=param;
 						}
-						head.insertBefore(em,null);
-						log(em);
 					}else{
-						
 						em=D.createElement('link');
-						em.type='text/css';
 						em.charset='UTF-8';
 						em.rel='stylesheet';
-						em.id=nodeId;
-						em.href=param;
-						head.insertBefore(em,null);
-						//log(em.sheet);
-					}
 
-					cb=function(){
-						clsTimer(tmer);
-						clsTimer(ttmer);
-						callCb();
-						loader[uniqueKey]=U;
-					};
-					tmer=timer(function(){
-						//log('try');
-						try{
-							//log(em.styleSheet,em.sheet.cssRule);
-							if(em.styleSheet||em.sheet){
-								cb();
-							}
-						}catch(e){
-							//log(e);
-							cb();
+						if(!timer.$){
+							timer.$=U;
+							timer.S='onload' in em;
 						}
-					},50,1);
-					ttmer=timer(cb,3E4,0,cb,U);
+					}
+					em.type='text/css';
+
+					//T.log('enter here');
+					cb=function(f){
+						//T.log(arguments);
+						if (f===U||resLoadedReg.test(em.readyState)) {
+							clsTimer(tmer);
+							clsTimer(ttmer);
+
+							em.onerror = em.onload = null;
+
+							preEm&&head.removeChild(preEm);
+							
+							callCb();
+							
+							if(isOuter){
+								delete loader[uniqueKey];
+							}else{
+								loader[uniqueKey]=U;
+							}
+						}
+					};
 					
+					ttmer=timer(cb,3E4,0,cb,U);
+					if(em.readyState){
+						tmer= timer(cb, 50, U);
+					}else if(!isCode && timer.S){
+						em.onload=em.onerror=cb;
+					}else{
+						timer(cb,isCode?50:1E3);
+					}
+					if(!isCode){
+						em.href=param;
+					}
 				}else{
 					em = D.createElement('script')
-					em.type='text/javascript';
+					//em.type='text/javascript';
 					em.defer='defer';
 					em.charset='UTF-8';
-					em.id=nodeId;
-					em.async=U;
+					//em.async=U;
 					cb = function (f) {
-						if (f===U||scriptLoadedReg.test(em.readyState)) {
+						if (f===U||resLoadedReg.test(em.readyState)) {
 							clsTimer(tmer);
 							clsTimer(ttmer);
 							em.onerror = em.onload = null;
@@ -193,11 +206,14 @@
 					ttmer=timer(cb,3E4,0,cb,U);
 					if(em.readyState)tmer= timer(cb, 50, U);//opera load not exist file bug , use setInterval fix it 
 					em.onerror = em.onload = cb;
-					if(isCode)em.text='try{'+param+'}catch(e){T.log(e)}document.getElementById("'+nodeId+'").onload()';
-					else em.src=param;
-					head.insertBefore(em,null);
+					if(isCode){
+						em.text='try{'+param+'}catch(e){T.log(e)}document.getElementById("'+nodeId+'").onload()';
+					}else{
+						em.src=param;
+					}
 				}
-
+				em.id=nodeId;
+				head.insertBefore(em,null);
 				
 			}
 		},
@@ -237,10 +253,10 @@
 		xver=nowTime.toString(32),
 		store, engine,engines,cache;//control file versions name,storage prefix;
 	if(!T){//if not exist Ctrl
-		cache=paramFrom('che',scriptCfg)=='true';//recognize need cache
+		cache=paramFrom('c',scriptCfg)=='true';//recognize need cache
 		mix(innerT,{
-			_M:paramFrom('js_fmt',scriptCfg)||'#k.js?v=#v.js',//load js file format
-			_S:paramFrom('css_fmt',scriptCfg)||'#k.css?v=#v.css',
+			_M:paramFrom('jf',scriptCfg)||'#k.js?v=#v.js',//load js file format
+			_S:paramFrom('cf',scriptCfg)||'#k.css?v=#v.css',
 			_I:paramFrom('sis',scriptCfg)=='true',//the period is path segmentation
 			_F:paramFrom('cfv',scriptCfg)||xver
 		});
@@ -250,12 +266,7 @@
 				T.$r.push([p,f]);
 				return T
 			},
-			coreReady:function(f){//
-				if(!T.$c)T.$c=[];
-				T.$c.push(f);
-				return T
-			},
-			allReady:function(f){//
+			idle:function(f){//
 				if(!T.$a)T.$a=[];
 				T.$a.push(f);
 				return T
@@ -294,8 +305,8 @@
 			}*/
 			//log(f);
 			runWatch(f);
-			if(f){//run allReady methods
-				T.allReady=ready;
+			if(f){//run idle methods
+				T.idle=ready;
 				if(T.$a){
 					tryRun(T.$a);
 					delete T.$a;
@@ -311,9 +322,9 @@
 					//var a=[];
 					//for(var p in $R)a.push(p);
 					//log(a);
-					if(im(T.onload)){
+					if(im(T.onresload)){
 						tryRun(function(){
-							T.onload(k,$R);
+							T.onresload(k,$R);//notify T loaded file
 						});
 					}
 				}
@@ -379,6 +390,7 @@
 				return store.getItem(key);
 			},
 			set: function (key, value) {
+				store.removeItem(key);//iPhone/iPad QUOTA_EXCEEDED_ERR then remove it first
 				store.setItem(key, value);
 			},
 			del: function (key) {
@@ -407,6 +419,7 @@
 				return U
 			},
 			get: function (key) {
+				key='_'+key;
 				//try {
 					store.load(key);
 					return store.getAttribute(key);
@@ -415,6 +428,7 @@
 				//}
 			},
 			set: function (key, value) {
+				key='_'+key;
 				store.load(key);
 				//alert(key);
 				store.setAttribute(key, value);
@@ -422,6 +436,7 @@
 				store.save(key);
 			},
 			del: function (key) {
+				key='_'+key;
 				store.load(key);
 				//store.removeAttribute();
 				store.expires = nowTime.toUTCString();
@@ -482,12 +497,6 @@
 		}else{
 			tryRun(f);
 		}
-	},coreCallback=function(){//core file callback
-		T.coreReady=ready;
-		if(T.$c){//core file ready,run coreReady methods
-			tryRun(T.$c);
-			delete T.$c;
-		}
 	};
 	mix(T,{
 		Store:engine,
@@ -544,8 +553,8 @@
 				code:EMPTY,
 				id:EMPTY,
 				done:noop
-			},ops);//loader=function(param,uniqueKey,callback,isCode,isCss,isOuter,callCb,head,em,tmer,cb,ttmer){
-			loader(df.url||df.code,EMPTY,df.noop,df.code,df.type=='css',U,df.id);
+			},ops);//param,uniqueKey,callback,isCode,isCss,isOuter,nodeId,tId,callCb,head,em,tmer,cb,ttmer,preEm
+			loader(df.code||df.url,EMPTY,df.done,df.code,df.type=='css',U,df.id);
 		}
 	});
 	/*startup*/
@@ -558,7 +567,7 @@
 			}
 		}
 		//delete T._V; //if hide more info then delete it
-		runFiles(coreList&&coreList.split(',')||[],coreCallback);
+		//runFiles(coreList&&coreList.split(',')||[],coreCallback);
 		T.using=function(p,f){
 			runFiles(p,f);
 			return T;

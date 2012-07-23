@@ -14,8 +14,11 @@
 </body>
 <?php include_once("scripts/T.single.inc") ?>
 <script type="text/javascript">
-T.allReady(function(){
-	console.log(arguments);
+T.onresload=function(a,b){
+	T.log(a,b);
+}
+T.idle(function(){
+	T.log(arguments);
 	T.publish({
 		abc:function(){
 			
@@ -26,7 +29,7 @@ T.using('XY.Widget.Autocomplete',function(){
 	var ac=new XY.Widget.Autocomplete();
 	ac.show();
 });
-T.coreReady(function(){
+T.using('K',function(){
 K.logTime('tmpl');
 //K.TP.using('haha->:\'\\\\adfadf\\\'"<#=this.abc#>;{;{;;};;<#=this.abc#>;;adfa<#for(var i=0;i<10;i++){#>a-><#if(i==0){#>aaa<#}#><#=i#>;;<#}#>;;adsfafdasdf</a-><a href="javascript:;" onclick="alert(K.nodeAttr(this,\'data-info\'));return false" data-info="<#=K.strHTML(this.bbb)#>"><#=K.strHTML(this.bbb)#></a>').toFill(document.body,{abc:'123',bbb:'x\'y\'z\\""><'});
 K.logTime('tmpl');

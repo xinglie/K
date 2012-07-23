@@ -436,7 +436,7 @@ T.cache('K', [], function() {
 			if (!o || (!_r(o) && typeof o != B)) return o;
 			else if (o[p = 'cloneNode']) return o[p](U);
 			else if (_r(o)) c = new Function('return ' + o)(); //clone function eval in cur env,Funtion in global
-			else c = (p = o.constructor, c = new p(o.valueOf()), o == c) ? new p() : c; //clone others,recognize the cloned and src is equal then pass or not params,array not pass params
+			else c = (p = o.constructor, c = new p(o.message||o.valueOf()), o == c) ? new p() : c; //clone others,recognize the cloned and src is equal then pass or not params,array not pass params
 			y.push(o, c);
 			for (p in o) if (has.call(o, p)) c[p] = $G(y, o[p]); //use $o.hasOwnProperty avoid obj o rewrite the hasOwnProperty method
 			return c

@@ -10,19 +10,17 @@ try {
 		cfg={
 			cfgFile:'_.cfg',//配置文件
 			renderBootstrapPath:'',//输出的启动文件的路径
-			coreFile:'T.js',//核心文件
 			hostTemplateFile: 'T.Host.tmpl',//Ctrl公开方法宿主文件模板 分开的用
 			//verTemplateFile:'Ctrl.FilesVer.tmpl',//版本文件模板
 			//bootTemplateFile:'Ctrl.Bootstrap.tmpl',//页脚启动文件模板
 			//bootSingleTemplateFile:'Ctrl.Bootstrap.Single.tmpl',//单个启动文件
 			renderHostFile: 'T.Host.inc',//输出的宿主文件
-			renderBootFile:'T.inc',//输出的启动文件
-			renderBootstrapFile:'T.js',
-			renderBootstrapSourceFile:'T.source.js',
-			renderSingleBootFile:'T.Single.inc',//输出的单个启动文件
+			renderBootFile:'T.inc',//输出的启动包含文件
+			renderBootstrapFile:'T.js',//核心启动文件
+			renderBootstrapSourceFile:'T.source.js',//未压缩的核心启动文件
+			renderSingleBootFile:'T.Single.inc',//输出的单个启动包含文件
 			renderVerFile:'T.FVS.js',//输出的文件版本控制文件
-			renderVerSourceFile:'T.FVS.source.js',//
-			sourceSuffixReg:/\.source\.js$/i,
+			renderVerSourceFile:'T.FVS.source.js',//未压缩的文件版本文件
 			suffixReg:{
 				js:{
 					source:/\.source\.js$/i,
@@ -123,7 +121,11 @@ try {
 				for(;!files.atEnd();files.moveNext()){
 					//WScript.Echo(files.item());
 					file=fso.GetFile(files.item());
-					if(file.Name&& file.Name != selfName &&cfg.coreFile!=file.Name&&cfg.renderVerFile!=file.Name){
+					if(file.Name
+						&& file.Name!=cfg.renderBootstrapFile
+						&& file.Name!=cfg.renderBootstrapSourceFile
+						&& file.Name!=cfg.renderVerFile
+						&& file.Name!=cfg.renderVerSourceFile){
 						if(cfg.isDev){
 							if(suffixInfo.source.test(file.Name)){
 								WScript.Echo('process file:'+file.Name);
@@ -193,11 +195,6 @@ try {
 				renderBootstrapPath:function(v){
 					if(v){
 						cfg.renderBootstrapPath=v.charAt(v.length-1)=='/'?v:v+'/';
-					}
-				},
-				coreLibFile:function(v){
-					if(v){
-						cfg.coreLibFile=v;
 					}
 				},
 				verCtrlFileTmpl:function(v){
@@ -295,19 +292,20 @@ try {
 		fso.CopyFile(parentFolderSeg+ cfg.renderVerFile,parentFolderSeg+ cfg.renderVerSourceFile);
 
 		//如果有启动文件，则获取md5，要自动升级启动文件!!
-		if(fso.FileExists(parentFolderSeg+cfg.coreFile)){
-			file=fso.GetFile(parentFolderSeg+cfg.coreFile);
+		var coreFile=cfg.isDev?cfg.renderBootstrapSourceFile:cfg.renderBootstrapFile;
+
+		if(fso.FileExists(parentFolderSeg+coreFile)){
+			file=fso.GetFile(parentFolderSeg+coreFile);
 			tempHash=cfg.getFileMd5(file);
 		}else{
-			WScript.Echo("Cannot find "+cfg.coreFile);
-			throw cfg.coreFile;//没有启动文件什么也干不了，所以退出
+			WScript.Echo("Cannot find "+coreFile);
+			throw coreFile;//没有启动文件什么也干不了，所以退出
 		}
 
 		//生成启动文件包含文件，上下分离的页脚启动文件
 		tmpl=cfg.bootstrapTmpl;//cfg.getFileContent(folderSeg+ cfg.bootTemplateFile);
 		cfg.writeFile(parentFolderSeg+ cfg.renderBootFile,tmpl.replace(/<#=boot_ver#>/g,tempHash)
-						  .replace(/<#=boot_strap#>/g,cfg.isDev?cfg.renderBootstrapSourceFile:cfg.renderBootstrapFile)
-						  .replace(/<#=core_lib_file#>/,cfg.coreLibFile)
+						  .replace(/<#=boot_strap#>/g,coreFile)
 						  .replace(/<#=render_bootstrap_path#>/g,cfg.renderBootstrapPath));
 		//生成单个的启动文件包含文件
 		tmpl=cfg.singleBootstrapTmpl;//cfg.getFileContent(folderSeg+ cfg.bootSingleTemplateFile);
@@ -318,8 +316,7 @@ try {
 						  .replace(/<#=css_url_format#>/g,cfg.cssFileFormat)
 						  .replace(/<#=boot_ver#>/g,tempHash)
 						  .replace(/<#=file_ver#>/g, verFileHash)
-						  .replace(/<#=core_lib_file#>/,cfg.coreLibFile)
-						  .replace(/<#=boot_strap#>/g,cfg.isDev?cfg.renderBootstrapSourceFile:cfg.renderBootstrapFile));
+						  .replace(/<#=boot_strap#>/g,coreFile));
 		WScript.Echo('done!');
 		WScript.Sleep(1000);
 		WScript.Quit();

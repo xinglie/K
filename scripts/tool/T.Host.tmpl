@@ -11,18 +11,13 @@
 			C.$r.push([p,f]);
 			return C;
 		},
-		allReady:function(f){//
+		idle:function(f){//
 			if(!C.$a)C.$a=[];
 			C.$a.push(f);
 			return C
 		},
 		isCached:function(){
 			return false;
-		},
-		coreReady:function(f){
-			if(!C.$c)C.$c=[];
-			C.$c.push(f);
-			return C
 		},
 		publish:function(o){
 			if(!C._L)C._L={};
