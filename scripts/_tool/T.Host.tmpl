@@ -1,0 +1,48 @@
+<script type="text/javascript">
+(function(W,C,P,E,H){
+	H=Object.prototype.hasOwnProperty;
+	P=function(k,v){
+		if(!C[k])C[k]=[];
+		C[k].push(v);
+	};
+	C=function(a){
+		return a&&a.nodeType?a:document.getElementById(a);
+	};
+	E=function(a,b,p){
+		for(p in b){
+			if(H.call(b,p)){
+				a[p]=b[p]
+			}
+		}
+		return a;
+	}
+	W.T=E(C,{
+		cache:<#=cache#>,
+		_C:'<#=ctrl_file#>',
+		_F:'<#=ctrl_file_ver#>',
+		_M:'<#=js_url_format#>',
+		_S:'<#=css_url_format#>',
+		use:function(p,f){
+			P('$r',[p,f]);
+			return C;
+		},
+		idle:function(f){
+			P('$a',f)
+		},
+		isCached:function(){
+			return false;
+		},
+		publish:function(o){
+			if(!C._L)C._L={};
+			for(var p in o)C._L[p]=o[p];
+			return C
+		},
+		invoke:function(){
+			return false
+		},
+		listen:function(f){
+			P('$w',f)
+		}
+	});
+}(window));
+</script>

@@ -3,7 +3,6 @@ body, html{
 	padding: 0;
 	height: 100%;
 	border: none;
-	overflow: hidden;
 	background-color: #FFF;
 }
 
@@ -11,6 +10,20 @@ body, html, table, form, textarea{
 	font: 12px monospace, sans-serif;
 }
 
+ul li{
+	height:20px;
+	line-height: 20px;
+	list-style-type:none;
+	padding:0;
+	margin:0px;
+}
+ul{
+	border:solid 1px #000;
+	padding:0;
+	margin:0;
+}
+
+.fl li{float:left;width:100px;height:100px;}
 #editor{
 	border: solid #888 1px;
 	overflow: hidden;

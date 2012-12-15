@@ -1,0 +1,777 @@
+<!DOCTYPE>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>HTA</title>
+		<meta http-equiv="MSThemeCompatible" content="yes">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<HTA:Application ID="HTA"
+			applicationname="HTA"
+			caption="yes"
+		　	singleinstance="yes"
+			scroll="yes"
+			icon="images/logo.ico"
+		/>
+		<style>
+		html,body,ul,li,p{margin:0;padding:0;line-height:1.5;font-size:14px}
+		.fm{width:100%;}
+		.fm .lbl{width:100px;}
+		.fm .cnt{width:80%;}
+		.fm .cnt input{width:95%;border:solid 1px #ccc;height:22px;line-height:22px}
+		#main{overflow:auto;}
+		</style>
+	</head>
+	<body>
+		<table class="fm">
+			<tr><td class="lbl">百度空间地址：</td><td class="cnt"><input value="http://hi.baidu.com/new/kooboy" id="x_blog_url" /></td><td><button id="x_start_agg">检索</button></td></tr>
+			<tr><td colspan="3">
+				<div id="main"></div>
+			</td></tr>
+		</table>
+	</body>
+	<script type="text/javascript">
+	(function(){
+		var fso=new ActiveXObject("Scripting.FileSystemObject"),
+			ts=fso.OpenTextFile('scripts/T.Single.inc',1)
+			rs=ts.ReadAll();
+			ts.Close();
+			document.write(rs);
+	}());
+	</script>
+	<script type="text/javascript">
+
+	/*T.use('X.Youdao.Note',function(e){
+		var N=K.access(e.dps[0]);
+		/*N.update({
+			notePath:'/5DEEF345E1704D5AB29078A75BE63052/K17908qo17',
+			title:'中文测试',
+			content:'这个也是'
+		});*/
+		/*N.on(N.LOGIN_START,function(e){
+			document.title=e.type;
+		});
+		N.on(N.LOGIN_FINISH,function(e){
+			document.title=e.type;
+		});
+		N.get('/5DEEF345E1704D5AB29078A75BE63052/K17908qo17',function(text){
+			alert(text);
+		});
+	});*/
+	/*T.use('X.HTA.Iframe',function(e){
+		if(e.safety){
+			var I=K.access(e.dps[0]);
+			var i=new I();
+			i.on(I.LOADED,function(e){
+				//return;
+				var tas=e.nodeById('commentDetail').getElementsByTagName('textarea'),
+					ta;
+				for(var i=0,j=tas.length;i<j;i++){
+					if(tas[i].className=='qcmt-textarea-box'){
+						ta=tas[i];
+						break;
+					}
+				}
+				if(ta){
+					ta.value='操你妈b';
+				}
+				var as=e.nodeById('commentDetail').getElementsByTagName('a');
+				for(var i=0,j=as.length;i<j;i++){
+					if(~as[i].className.toLowerCase().indexOf('button-save')){
+						//as[i].click();
+						break;
+					}
+				}
+			});
+			i.navigate('http://hi.baidu.com/chenwolong/item/b3d6160b6fcb529ba2df4379');
+		}
+	});*/
+	/*cao_wolong  cao_123*/
+	/*var ws=new ActiveXObject("Internetexplorer.Application");
+    ws.Navigate('http://hi.baidu.com/chenwolong/item/1eecfa8f5cf39456850fabc8');
+    ws.Visible=true;
+    var text=['来到台上敬个礼 闲言碎语评价你 你妈上来把腿劈 你奶扮纯装处女',  
+'不老传说大舞曲 为何感觉不到你 你爸是个臭地痞 竟跟妓女睡一起',  
+'你爷上回受了伤 屁眼子上有道伤 偷看你妈烂裤裆 一摸老二直淌汤', 
+'每天爱你多一些 你管你哥还叫爹 你爷突然把嘴撅 要和你妈两情约',  
+'翻开情书看过去 鼻涕眼泪甩一地 大肠干燥还便秘 操回你姐算艳遇', 
+'生活口粮吃猪食 让人打哭仍坚持 口圆舌滑心不直 岁月流情伤往时', 
+'门口挂面照妖镜 你爸感染爱滋病 无止疼痛真要命 抓来你妈对对碰',  
+'呼喊无力把天求 一万自杀的理由 感怀身世愁白头 贪生怕死把泪流',  
+'无边无际把口夸 你家半夜燃火花 开灯下地把鬼抓 原来你爷操你妈', 
+'突然收到一封信 原来你妈是小聘 一次意外盼监禁 老脸上头烙钢印', 
+'挨揍渐渐成习惯 无数金星眼前转 经常被人打住院 痛彻心扉说情愿', 
+'抬头望月思亲朋 含泪日夜盼重逢 摸摸伤口有点疼 往上摸点农村红',  
+'苦恋滋味多无奈 你是黑山老妖怪 如果这都不算爱 一脚就把你妈踹', 
+'失眠夜里多漫长 你姥恋上我的床 非要让我当新郎 照逼一顿小弹簧', 
+'哭着含泪道声别 你爸黄泉见你爷 你爷身材像番茄 右腿昨天被打瘸',
+'忘记你妈做不到 你爱收集避孕套 迪吧舞厅卖春药 照你老脸一顿炮',  
+'叼蛮任性是你妈 无数嫖客把她抓 抓住你妈脸刮花 鼻梁软骨被打塌', 
+'还是觉得你最好 出门你就被狗咬 干出血了都不跑 说那狗是你大嫂', 
+'看见野猫把爱恋 你找你妈对小便 追着你妈去放电 操逼速度如闪电', 
+'想起过去回头难 你跟母猪玩缠绵 昨夜梦见李香兰 一摸裤裆直发粘', 
+'明天你就要枪嘣 你爸领你去吹风 看见母狗直发蒙 冲刺速度撞大钟']
+
+    setInterval(function(){
+    	if(ws.document.getElementById('commentDetail')){
+    		var tas=ws.document.getElementById('commentDetail').getElementsByTagName('textarea'),
+				ta;
+			for(var i=0,j=tas.length;i<j;i++){
+				if(tas[i].className=='qcmt-textarea-box'){
+					ta=tas[i];
+					break;
+				}
+			}
+			if(ta){
+				ta.value=text[Math.round(Math.random()*(text.length-1))];
+			}
+			var as=ws.document.getElementById('commentDetail').getElementsByTagName('a');
+			for(var i=0,j=as.length;i<j;i++){
+				if(~as[i].className.toLowerCase().indexOf('button-save')){
+					as[i].click();
+					break;
+				}
+			}
+    	}
+    },5E3);*/
+	
+    T.use('X.HTA.IE,X.HTA.Downloader,X.JSON',function(e){
+    	//Unicode:汉字的Unicode编码范围为\u4E00-\u9FA5 \uF900-\uFA2D,如果不在这个范围内就不是汉字了
+    	var xhr=new K.IO(),
+    		start=19968,
+    		end=40896,
+    		middle=(end-start)/2,
+    		current=start,
+    		temp={no:{},yes:{}};
+    		pull=function(begin,finish){
+    			var ec=encodeURIComponent(String.fromCharCode(begin));
+    			var str=ec.split('%').join('Zdic');
+    			xhr.send({
+		    		url:'http://www.zdic.net/zd/zi/'+str+'.htm',
+		    		timeout:6e4,
+		    		done:function(x){
+		    			//alert(current);
+		    			if(begin>finish||begin==end){
+		    				var s=(X.JSON.stringify(temp));
+		    				X.HTA.IO.writeByString('d:\\'+finish+'.txt',s);
+		    				document.title='finished';
+		    				return;
+		    			}
+		    			document.title=begin;//+','+K.guid();
+		    			if(x.error){
+		    				//if(x.error=='timeout'){
+		    					pull(begin,finish);
+		    				//}else{
+		    				//	alert(x.error);
+		    					return;
+		    				//}
+		    			}
+		    			if(x.type==K.IO.XHR){
+		    				//.match(/<span class="dicpy">[^<>]*?<script>spf\("[\s\S]*?"\)/g)
+		    				var str=x.xhr.responseText.replace(/<(style)[^>]*>[\s\S]*?<\/\1>/gi,'').replace(/<(?:meta|link)[^>]*>/g,'').replace(/\s+/g,' ');
+		    				str=String(str.match(/<table[^>]*id="pytab">[\s\S]*<\/table>/i));
+		    				var ms=str.match(/<span class="dicpy">[^<>]*?<script>spf\("[\s\S]*?"\)/g);
+		    				if(ms){
+		    					var reg=/spf\("([^\d]+)/g;
+			    				for(var i=0,m;i<ms.length;i++){
+			    					m=ms[i];
+			    					m=m.replace(reg,function(a,b,c){
+			    						c=(begin-start).toString(32)
+			    						if(T.has(temp.yes,b)){
+			    							if(!new RegExp('(?:^|,)'+c+'(?:,|$)').test(temp.yes[b])){
+				    							temp.yes[b]+=','+ c;
+				    						}
+			    						}else{
+			    							temp.yes[b]=c
+			    						}
+			    					});
+			    				}
+			    			}else{
+			    				temp.no[begin-start]=begin;
+			    			}
+			    			begin++;
+			    			pull(begin,finish);
+		    			}
+		    		}
+		    	});
+    		},
+    		combine=function(){
+    			var files=X.HTA.IO.getFolderObject('d:\\gbk').files;
+    			var com={yes:{},no:{},noTotal:0,yesTotal:0},locker={},chLocker={},
+    				com1={},
+    				com2={};
+    			for(var i=0,one,ones,oneYesTotal,oneNoTotal;i<files.length;i++){
+    				oneYesTotal=0;
+    				oneNoTotal=0;
+
+    				var obj=X.JSON.parse(X.HTA.IO.readAsString(files[i]));
+    				for(var p in obj.no){
+    					if(T.has(obj.no,p)){
+    						com.no[p]=String.fromCharCode(obj.no[p]);
+    						com.noTotal++;
+    						oneNoTotal++;
+    					}
+    				}
+    				for(p in obj.yes){
+    					if(T.has(obj.yes,p)){
+    						one=obj.yes[p];
+    						ones=one.split(',');
+    						for(var idx=0,ch;idx<ones.length;idx++){
+    							ch=String.fromCharCode(parseInt(ones[idx],32)+start);
+    							if(!T.has(locker,p+'_'+ch)){
+    								locker[p+'_'+ch]=true;
+    								if(T.has(com.yes,p)){
+    									com.yes[p]+=ch;
+    								}else{
+    									com.yes[p]=ch;
+    								}
+    								var num=parseInt(ones[idx],32);
+    								var to28=num.toString(28);
+    								if(T.has(com1,p)){
+    									com1[p]+=('000'+to28).slice(-3);
+    								}else{
+    									com1[p]=('000'+to28).slice(-3);
+    								}
+    								if(!T.has(chLocker,ch)){
+    									chLocker[ch]=true;
+	    								com.yesTotal++;
+	    								oneYesTotal++;
+	    							}
+    							}
+    						}
+    					}
+    				}
+    				obj.yesTotal=oneYesTotal;
+    				obj.noTotal=oneNoTotal;
+    				//X.HTA.IO.writeByString(files[i],X.JSON.stringify(obj));
+    			}
+    			for(var p in com1){
+    				if(T.has(com1,p)){
+    					var chars=com1[p];
+    					//alert(chars.length);
+    					for(var i=2;i<=chars.length;i++){
+    						for(var j=i-2;j<i-1;j++){
+    							var str=chars.substring(j,i);
+    							if(!T.has(com2,str)){
+    								com2[str]=1;
+    							}else{
+    								com2[str]++;
+    							}
+    						}
+    					}
+    					//break;
+    				}
+    			}
+    			var temp={};
+    			var ta=[];
+    			for(var p in com2){
+    				ta.push({
+    					key:p,
+    					val:com2[p]
+    				});
+    			}
+    			ta.sort(function(a,b){
+    				return a.val-b.val;
+    			});
+    			ta={list:ta,length:ta.length};
+    			X.HTA.IO.writeByString('d:\\com.txt',X.JSON.stringify(com));
+    			X.HTA.IO.writeByString('d:\\com11.txt',X.JSON.stringify(com1));
+    			X.HTA.IO.writeByString('d:\\com22.txt',X.JSON.stringify(ta));
+    		},
+    		compress=function(){
+    			var src=X.HTA.IO.readAsString('d:\\com11.txt');
+    			var regA=[];
+    			var b28Reg=/[^0-9a-r]/;
+    			var rLength=2;
+    			for(var i=33;i<127;i++){
+    				if(i!=34&&i!=92){
+	    				var ch=String.fromCharCode(i);
+	    				if(b28Reg.test(ch)){
+	    					regA.push(ch);
+	    				}
+    				}
+    			}
+    			var com1=X.JSON.parse(src);
+    			var com2={};
+    			for(var p in com1){
+    				if(T.has(com1,p)){
+    					var chars=com1[p];
+    					//alert(chars.length);
+    					for(var i=rLength;i<=chars.length;i++){
+    						//for(var j=i-rLength;j<i-1;j++){
+    							var str=chars.substring(i-rLength,i);
+    							if(!T.has(com2,str)){
+    								com2[str]=1;
+    							}else{
+    								com2[str]++;
+    							}
+    						//}
+    					}
+    					//break;
+    				}
+    			}
+    			var temp={};
+    			var ta=[];
+    			for(var p in com2){
+    				ta.push({key:p,val:com2[p]});
+    			}
+    			ta.sort(function(a,b){
+    				return b.val-a.val;
+    			});
+    			var total=0;
+    			for(var i=0;i<=regA.length;i++){
+    				var v=ta[i].val;
+    				var t=(rLength-1)*v-rLength-5;
+    				total+=t;
+    			}
+    			var map={};
+    			for(var i=0;i<regA.length;i++){
+    				map[regA[i]]=ta[i].key;
+    			}
+    			for(var p in com1){
+    				if(T.has(com1,p)){
+    					var chars=com1[p];
+    					for(var m in map){
+    						if(T.has(map,m)){
+    							var reg=new RegExp(K.strReg(map[m]),'g');
+    							chars=chars.replace(reg,m);
+    						}
+    					}
+    					com1[p]=chars;
+    				}
+    			}
+    			var ta={
+    				ta:ta,
+    				total:total,
+    				map:map//,
+    				//db:com1
+    			}
+				X.HTA.IO.writeByString('d:\\cps'+rLength+'.txt',X.JSON.stringify(ta));
+    		},
+    		chars=(function(){
+    			var a=[];
+				for(var i=33;i<127;i++){
+				    if(i==9||i==10||i==13||i==34||i==92||i==45)continue;
+				    a.push(String.fromCharCode(i));
+				}
+				return a.join('');
+    		}()),
+    		to103=function(num,y){
+    			var result='',
+					temp;
+				y=y||chars.length;
+				while(num){
+					temp=num%y;
+					result=chars.charAt(temp)+result;
+					num=(num-temp)/y;
+				}
+				return result;
+    		},
+    		from103=function(str){
+    			var result=0,
+					temp=1;
+				for(var idx=str.length-1;idx>-1;idx--){
+					result+=temp*(chars.indexOf(str.charAt(idx)));
+					temp*=chars.length;
+				}
+				return result;
+    		},
+    		comToNum=function(){
+    			var comSrc=X.HTA.IO.readAsString('d:\\com.txt');
+    			var com=X.JSON.parse(comSrc);
+    			var newCom={},
+    				mCom={},
+    				aCom={};
+    			/*for(var i=0;i<chars.length;i++){
+    				alert(chars.charAt(i));
+    			}*/
+    			for(var p in com.yes){
+    				if(T.has(com.yes,p)){
+    					var one=com.yes[p];
+    					var items=one.split('');
+
+    					for(var i=0;i<items.length;i++){
+    						if(items[i]=='益'){
+    							alert(p);
+    						}
+    						var num=items[i].charCodeAt(0);
+    						num=num-start-middle;
+    						//alert(to103(Math.abs(num)));
+    						var aNum=to103(Math.abs(num));
+    						if(items[i]=='益'){
+    							alert(aNum+','+num);
+    						}
+    						if(num<0){
+    							if(aNum.length<=2){
+    								aNum=('!!!'+aNum).slice(-2);
+    							}else if(aNum.length>2){
+    								aNum='-'+aNum.slice(-2);
+    							}
+                                if(items[i]=='益'){
+                                    alert(aNum);
+                                }
+    							if(T.has(mCom,p)){
+	    							mCom[p]+=aNum;
+	    						}else{
+	    							mCom[p]=aNum;
+	    						}
+    						}else{
+    							if(aNum.length<=2){
+    								aNum=('!!'+aNum).slice(-2);
+    							}else if(aNum.length>2){
+    								aNum='-'+aNum.slice(-2);
+    							}
+    							if(T.has(aCom,p)){
+	    							aCom[p]+=aNum;
+	    						}else{
+	    							aCom[p]=aNum;
+	    						}
+    						}
+    						/*if(T.has(newCom,p)){
+	    							newCom[p]+=aNum;
+	    						}else{
+	    							newCom[p]=aNum;
+	    						}*/
+    						//break;
+    					}
+    					//break;
+    				}
+    			}
+    			var ta=[];
+    			for(var i=91*91-1;i<=10435;i++){
+    				var t=to103(i,chars.length);
+    				ta.push(t);
+    			}
+    			newCom.a=aCom;
+    			newCom.m=mCom;
+    			//newCom.ta=ta;
+    			//newCom.ta=ta;
+    			//newCom.taLength=ta.length;
+    			X.HTA.IO.writeByString('d:\\newcom.txt',X.JSON.stringify(newCom));
+    		},
+    		fromNumCom=function(){
+    			var com=X.HTA.IO.readAsString('d:\\newcom.txt');
+    			var comObj=X.JSON.parse(com);
+    			var aCom=comObj.a;
+    			var mCom=comObj.m;
+    			var group=/-?.{2}/g;
+				var rg=/^-/;
+				var base=start;
+    			var result={};
+    			
+    			var fromX=function(str){
+					var result=0,
+						temp=1;
+					for(var idx=str.length-1;idx>-1;idx--){
+						result+=temp*(chars.indexOf(str.charAt(idx)));
+						temp*=91;
+					}
+					return result;
+				},
+				fn=function(a,f){
+					var p,gs,i,ch,num;
+					for(p in a){
+						if(T.has(a,p)){
+							gs=a[p].match(group);
+							for(i=0;i<gs.length;i++){
+								ch=gs[i].replace(rg,'#');
+								//alert(ch);
+                                num=fromX(ch);
+                                if(f&&ch=='!9'){
+                                    alert([p,num,String.fromCharCode(base+middle+(f?-num:num))]);
+                                }
+								
+								//alert(base+middle+(f?-num:num));
+								ch=String.fromCharCode(base+middle+(f?-num:num));
+								//break;
+                                 
+								if(T.has(result,p)){
+									result[p]+=ch;
+								}else{
+									result[p]=ch;
+								}
+								
+							}
+						}
+						//break;
+					}
+				};
+                alert(chars);
+				fn(mCom,1);fn(aCom);
+    			X.HTA.IO.writeByString('d:\\fnc.txt',X.JSON.stringify(result));
+    		},
+            compare=function(){
+                var com1=X.HTA.IO.readAsString('d:\\com.txt');
+                var fnc=X.HTA.IO.readAsString('d:\\fnc.txt');
+                var com1Obj=X.JSON.parse(com1).yes;
+                var fncObj=X.JSON.parse(fnc);
+                for(var p in com1Obj){
+                    if(T.has(com1Obj,p)){
+                        var chars=com1Obj[p];
+                        for(var i=0;i<chars.length;i++){
+                            if(!~fncObj[p].indexOf(chars.charAt(i))){
+                                alert(['false',fncObj[p],chars.charAt(i)]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                alert('true');
+            };
+    	flag=start+20000;
+    	//pull(flag,flag+1000);
+    	try{
+    	//combine();
+    	//compress();
+    	//comToNum();
+    	//fromNumCom();
+        compare();
+    	}catch(e){alert(e.message)}
+    	return;
+    	var DL=K.access(e.dps[1]);
+    	var dl=new DL();
+    	dl.setFolder('d:/');
+    	dl.on(DL.LOAD_SUCCESS,function(e){
+    		var fn=X.HTA.IO.getFolder('d:/');
+    		for(var p in fn){
+    			alert(p+','+fn[p]);
+    		}
+    	});
+    	dl.download('http://www.baidu.com/','a.jpg');
+
+    	var IE=K.access(e.dps[0]),
+    		ie=new IE();
+    	ie.on(IE.LOADED,function(e){
+    		/*K.nodeVal('_login_name','pft',e.doc);
+    		K.nodeVal('_login_pwd','888888',e.doc);
+    		K('_login_form',0,0,e.doc).submit();
+    		return;*/
+    		//var x=new e.win.XMLHttpRequest();
+    		//x.open('GET','http://www.xiaoyuan.com')
+    		/*try{
+    			e.win.T=Function('return new XMLHttpRequest()');
+    			alert(e.win.T());
+    			return;
+    			var xml=e.win.XY.Lang.getXMLReq();
+    			xml.open('GET','http://www.xiaoyuan.com',true);
+    			xml.onreadystatechange=function(){
+    				if(xml.readyState==4){
+    					alert(xml.responseText);
+    				}
+    			}
+    			xml.send('');
+    		//alert(e.win.ActiveXObject('Microsoft.XMLHTTP'));
+    	}catch(e){
+    		alert(e.message);
+    	}*/
+    		/*e.win.A=Function('return new ActiveXObject("Microsoft.XMLHTTP")');
+    		alert(e.win.A());
+    		var x=e.win.A();
+    		x.open('GET','http://www.baidu.com',true);
+    		x.onreadystatechange=function(){
+    			if(x.readyState==4){
+    				for(var p in x){
+    					alert(p);
+    				}
+    			}
+    		}
+    		x.send('');
+    		return;*/
+    		T.use('X.HTA.IfmXHR',function(){
+    			var xhr=new K.IO();
+	    		xhr.send({
+	    			//global:e.win,
+	    			//jsonp:'cb',
+	    			useIframe:true,
+	    			timeout:60000,
+	    			url:'http://www.baidu.com',
+	    			done:function(x){
+	    				alert(x.text);
+	    			}
+	    		})
+    		})
+    		
+    		return;
+    		var text=['来到台上敬个礼 闲言碎语评价你 你妈上来把腿劈 你奶扮纯装处女',  
+					'不老传说大舞曲 为何感觉不到你 你爸是个臭地痞 竟跟妓女睡一起',  
+					'你爷上回受了伤 屁眼子上有道伤 偷看你妈烂裤裆 一摸老二直淌汤', 
+					'每天爱你多一些 你管你哥还叫爹 你爷突然把嘴撅 要和你妈两情约',  
+					'翻开情书看过去 鼻涕眼泪甩一地 大肠干燥还便秘 操回你姐算艳遇', 
+					'生活口粮吃猪食 让人打哭仍坚持 口圆舌滑心不直 岁月流情伤往时', 
+					'门口挂面照妖镜 你爸感染爱滋病 无止疼痛真要命 抓来你妈对对碰',  
+					'呼喊无力把天求 一万自杀的理由 感怀身世愁白头 贪生怕死把泪流',  
+					'无边无际把口夸 你家半夜燃火花 开灯下地把鬼抓 原来你爷操你妈', 
+					'突然收到一封信 原来你妈是小聘 一次意外盼监禁 老脸上头烙钢印', 
+					'挨揍渐渐成习惯 无数金星眼前转 经常被人打住院 痛彻心扉说情愿', 
+					'抬头望月思亲朋 含泪日夜盼重逢 摸摸伤口有点疼 往上摸点农村红',  
+					'苦恋滋味多无奈 你是黑山老妖怪 如果这都不算爱 一脚就把你妈踹', 
+					'失眠夜里多漫长 你姥恋上我的床 非要让我当新郎 照逼一顿小弹簧', 
+					'哭着含泪道声别 你爸黄泉见你爷 你爷身材像番茄 右腿昨天被打瘸',
+					'忘记你妈做不到 你爱收集避孕套 迪吧舞厅卖春药 照你老脸一顿炮',  
+					'叼蛮任性是你妈 无数嫖客把她抓 抓住你妈脸刮花 鼻梁软骨被打塌', 
+					'还是觉得你最好 出门你就被狗咬 干出血了都不跑 说那狗是你大嫂', 
+					'看见野猫把爱恋 你找你妈对小便 追着你妈去放电 操逼速度如闪电', 
+					'想起过去回头难 你跟母猪玩缠绵 昨夜梦见李香兰 一摸裤裆直发粘', 
+					'明天你就要枪嘣 你爸领你去吹风 看见母狗直发蒙 冲刺速度撞大钟'];
+			new K.TM(8E3).on(function(){
+				var tas=K('commentDetail',0,0,e.doc).getElementsByTagName('textarea'),
+					ta;
+				for(var i=0,j=tas.length;i<j;i++){
+					if(tas[i].className=='qcmt-textarea-box'){
+						ta=tas[i];
+						break;
+					}
+				}
+				if(ta){
+					ta.value=text[Math.round(Math.random()*(text.length-1))];
+				}
+				var as=K('commentDetail',0,0,e.doc).getElementsByTagName('a');
+				for(var i=0,j=as.length;i<j;i++){
+					if(~as[i].className.toLowerCase().indexOf('button-save')){
+						as[i].click();
+						break;
+					}
+				}
+			})
+
+    	});
+    	//ie.navigate('http://hi.baidu.com/chenwolong/item/b3d6160b6fcb529ba2df4379');
+    	//ie.navigate('http://www.xiaoyuan.com');
+    });
+
+	T.use('X.Page',function(e){
+		if(e.safety){
+			var P=K.entity(e.dps[0],1),
+				rs=function(bd){
+					bd=K.body();
+					K.nodeStyle('main',{
+						height:bd.height-40+'px',
+						width:bd.width-20+'px'
+					});
+				};
+			rs();
+			P.on(P.PAGE_RESIZE,rs);
+		}
+	});
+	T.use('X.HTA.IfmXHR',function(e){
+		if(e.safety){
+			var I18n={
+				badBlogURL:'错误的博客地址，仅支持最新博客哦~'
+			};
+			var BaiduBlog={
+				_newBlogReg:/^http:\/{2}hi.baidu.com\/new\/[^\/]+\/?$/,
+				_maxPageReg:/<a[^>]*class[^>]*last[^>]*page=(\d+)[^>]*>/i,
+				_preNextReg:/<a[^>]*page=(\d+)[^>]*>[\s\S]*?next/i,
+				_articleReg:/<article[^>]*mod-blogitem[^>]*>[\S\s]*?<\/article>/gi,
+				_blogTitleReg:/<a[^>]*class[^>]*a-title[^>]*href="([^>]+)"[^>]*>([\s\S]*?)<\/a>/gi,
+				_blogDayReg:/<div[^>]*q-day[^>]*>(\d+)<\/div>/i,
+				_blogYearMonthReg:/<div[^>]*q-month-year>([\s\S]*?)<\/div>/i,
+				getNewBlogUrl:function(url){
+					var me=this;
+					if(me._newBlogReg.test(url)){
+						return {
+							url:url
+						}
+					}else{
+						return {
+							error:I18n.badBlogURL
+						}
+					}
+				},
+				processHTMLContent:function(cnt){
+					return String(cnt).replace(/<(\w+)[^>]*>\s*<\/\1>/g,'')
+									  .replace(/\s+/g,' ')
+									  .replace(/>\s*</g,'><')
+									  .replace(/<(style|script)[^>]*>[\S\s]*?<\/\1>/gi,'')
+									  .replace(/<!--[\s\S]*?-->/g,'')
+									  .replace(/<\/?(?:meta|link)[^>]*>/gi,'');
+				},
+				collectFetchInfoByFirstPage:function(info,callback){//根据博客文章首页获取相关的后续信息
+					var xhr=new K.XHR(),
+						me=this;
+					xhr.send({
+						url:info.url,
+						useIframe:true,
+						done:function(x){
+							var html=me.processHTMLContent(x.html);
+							//K.nodeVal('main',K.strHTML(html));
+							var maxPage=me._maxPageReg.exec(html);
+							if(maxPage){
+								maxPage=maxPage[1];
+							}else{
+								maxPage=me._preNextReg.exec(html);
+								if(maxPage){
+									maxPage=maxPage[1];
+								}
+							}
+							callback({
+								maxPage:maxPage||0
+							});
+						}
+					})
+				},
+				fetchBlogArticlesByPage:function(pageURL){
+					var me=this;
+					if(!me.$faXHR)me.$faXHR=new K.XHR();
+					me.$faXHR.send({
+						url:pageURL,
+						useIframe:true,
+						done:function(x){
+							var html=me.processHTMLContent(x.html);
+							//K.nodeVal('main',K.strHTML(html));
+							var result=[];
+							html.replace(me._articleReg,function(m){
+								var temp={};
+								m.replace(me._blogTitleReg,function(a,href,title){
+									temp.href=href;
+									temp.title=title;
+								});
+								m.replace(me._blogDayReg,function(a,day){
+									temp.day=day;
+								});
+								m.replace(me._blogYearMonthReg,function(a,yearMonth){
+									var ym=yearMonth.split('/');
+									temp.month=ym[0];
+									temp.year=ym[1];
+								});
+								result.push(temp);
+							});
+							me.renderOnePageArticles(result);
+						}
+					})
+				},
+				renderOnePageArticles:function(result){
+					var me=this,
+						fm=document.createDocumentFragment();
+					for(var i=0;i<result.length;i++){
+						var a=K('a',{href:'http://hi.baidu.com'+result[i].href});
+						a.innerHTML='['+[result[i].year,result[i].month,result[i].day].join('-')+']&nbsp;&nbsp;'+result[i].title;
+						fm.appendChild(a);
+						fm.appendChild(K('br',0));
+						fm.appendChild(K('br',0));
+					}
+					K('main').appendChild(fm);
+				},
+				startAggregate:function(){
+					var me=this;
+					K.on('x_start_agg','click',function(){
+						var url=K.nodeVal('x_blog_url'),
+							fixedInfo=me.getNewBlogUrl(url);
+						if(fixedInfo.error){
+							alert(fixedInfo.error);
+						}else{
+							me.collectFetchInfoByFirstPage(fixedInfo,function(data){
+								//alert(data.maxPage);
+								for(var i=1;i<=data.maxPage;i++){
+									me.fetchBlogArticlesByPage(fixedInfo.url+'?page='+i);
+								}
+							});
+						}
+					});
+				}
+			};
+			BaiduBlog.startAggregate();
+		}else{
+			//alert(e.reason);
+		}
+	});
+	</script>
+</html>

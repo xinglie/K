@@ -4,333 +4,389 @@
 */
 (function(W,D){
 	var E=D.documentElement,
+		SS=D.styleSheets,
 		EMPTY='',
+		COMMA=',',
+		DOCHEAD,
 		T=W.T,
+		T50=50,
 		OP=Object.prototype,
 		t=OP.toString,
 		s=Array.prototype.slice,//mapping
-		ia=function(a){return t.call(a)=='[object Array]'},//is array
-		im=function(a){return t.call(a)=='[object Function]'},//is method
-		has=OP.hasOwnProperty,
-		verFile = 'T.FVS',
+		get=function(a){return a&&a.nodeType?a:D.getElementById(a)},
+		ia=function(a){return~t.call(a).indexOf('Arr')},//is array
+		im=function(a){return~t.call(a).indexOf('Fun')},//is method
+		has=function(a,b){
+			return OP.hasOwnProperty.call(a,b);
+		},
 		//scriptNodes=D.getElementsByTagName('script'),
 		log=function(){
-			var a=W.console,b=arguments;
-			if(a&&a.log){
-				a.log.apply?a.log.apply(a,b):a.log(s.call(b))
+			var a=W.console,b=arguments,c;
+			if(a&&(c=a.log)){
+				c.apply?c.apply(a,b):c(s.call(b))
 			}
 		},
-		paramFrom=function(key,str,reg,r){//query form string
-			reg=new RegExp('(?:^|&)' + key + '=([^&]*)(?:&|$)','i');
-			r=str.match(reg);
-			return r?r[1]:EMPTY;
-		},
+		paramObj={},
 		noop=function(){
 		},
-		tryRun=function(f,i){
+		delFromObj=function(o,k){
+			delete o[k];
+		},
+		throwError=function(m){
+			throw Error(m);
+		},
+		tryWrap=function(f,o,dv){
+			return function(){
+				try{
+					return f.apply(o,arguments)
+				}catch(e){
+					log(e,f);
+				}
+				return dv;
+			}
+		},
+		tryRun=function(f,a,i,r,e){
 			if(!ia(f))f=[f];
+			if(!ia(a))a=[a];
 			for(i=0;i<f.length;i++){
 				try{
-					im(f[i])&&f[i]();
-				}catch(e){
-					log(e,f[i]);
+					e=f[i];
+					r=im(e)&&e.apply(e,a);
+				}catch(x){
+					log(e,x);
 				}
 			}
+			return r
 		},
-		watchList=[],
-		$R={},
-		$JCounter=0,
-		$RCounter=0,
-		runWatch=function(f,i,j,o,y){
-			for(i=0;watchList[i];i++){
-				j=1;
-				o=watchList[i];
-				if(!ia(o[0]))o[0]=[o[0]];
-				for(y=0;o[0][y];y++){
-					if(loader[o[0][y]]===U){
-						o[0].splice(y--,1);
-					}else{
-						j=0;
-						break;
-					}
-				}
-				if(j||(f&&!o[2])){
-					//log(o);
-					tryRun(o[1]);
-					watchList.splice(i--,1);
-				}
-			}
-		},
-		watch=function(w,f,fw){
-			watchList.push([w,f,fw]);
-			runWatch(WT._);
-			return T
-		},
-		curScript=D.getElementById('t_js'),//scriptNodes[scriptNodes.length-1],
+		watchResList=[],
+		curScript=get('t_js'),//scriptNodes[scriptNodes.length-1],
 		rootPath=curScript.src.replace(/[^\/]+$/,EMPTY),
-		scriptCfg=curScript.getAttribute("data-cfg"),
-		coreList=paramFrom('k',scriptCfg),
-		depsReg=/:\[([^\]]+)\]@/,
-		verReg=/^[^@]+@/,
+		scriptCfg=curScript.getAttribute("data-cfg")+EMPTY,
+		//coreList=paramObj('k',scriptCfg),
+		depsReg=/<([^>]*)>/,
+		verReg=/^[^>]+>/,
 		resLoadedReg=/(?:4|d|te)$/,
 		jsCssReg=/\.(?:js|css)$/i,
 		cssReg=/\.css$/i,
-		//levelReg=/\.[^\.]*$/,
-		U=true,
-		timer=function(f, t, b, g, a,z){//wrap timer
-			a = s.call(arguments, 4);
-			f = im(f) ? f : noop;
-			t=t||8;
-			z=function(){f.apply(g,a)};
-			return b ? W.setInterval(z,t) : W.setTimeout(z,t)
+		holderReg=/\.[^\.]*$/,
+		pathReg=/\/[^\/]+\/\.{2}\/|([^:\/])\/\/+/,
+		//dotReg=/\./g,
+		$kReg=/#k/g,
+		$vReg=/#v/g,
+		TRUE=!EMPTY,
+		FALSE=!TRUE,
+		setTimeout=W.setTimeout,
+		clearTimeout=W.clearTimeout,
+		T50FE=function(isRemove,fn,idx,one){
+			for(idx=0;idx<T50F.q.length;idx++){
+				one=T50F.q[idx];
+				if(isRemove){
+					if(one===fn){
+						T50F.q.splice(idx,1);
+						break;
+					}
+				}else{
+					//alert('xx>'+one);
+					one();
+				}
+			}
 		},
-		clsTimer=function(a){
-			W.clearInterval(a);
-			
-			W.clearTimeout(a);
+		T50F=function(fn,flag,idx){
+			if(!T50F.q)T50F.q=[];
+			if(!T50F.t)T50F.t=W.setInterval(T50FE,T50);
+			if(flag){
+				//alert(T50F.q.length);
+				T50FE(flag,fn);
+				if(!T50F.q.length){
+					W.clearInterval(T50F.t);
+					delFromObj(T50F,'t');
+				}
+			}else{
+				T50F.q.push(fn);
+			}
 		},
 		mix=function(a,b,p){
 			for(p in b){
-				a[p]=b[p]
+				if(has(b,p)){
+					a[p]=b[p]
+				}
 			}
 			return a;
 		},
-		ready=function(f){
-			im(f)&&tryRun(f);
-			return T;
-		},
-		WT=function(keys,m){m=this;m.k=keys||[];m.z=WT.i++;WT.$[m.z]=m;},
+		WT=function(keys,m){m=this;m.k=keys||[];m.z=WT.i++;WT.$[m.z]=m;WT.c++},
 		
-		loader=function(param,uniqueKey,callback,isCode,isCss,isOuter,nodeId,tId,callCb,head,em,tmer,cb,ttmer,preEm){
-			tId=isCode?'K'+(nowTime++):param
+		loader=function(param,uniqueKey,callback,isCode,isCss,isOuter,cs,tId,callCb,em,cb,preEm,needLoad,tempFn){
+			cs=cs||'UTF-8';
+			tId=isCode?'T'+(nowTime++):param
 			if(!uniqueKey)uniqueKey=tId;
-			if(!nodeId)nodeId=tId;
+			//if(isOuter)alert(uniqueKey+','+!uniqueKey+','+tId+','+isCss);
+			//if(!uniqueKey)uniqueKey=tId;
 
-			//T.log(isOuter,has.call(loader,uniqueKey));
-			if (has.call(loader,uniqueKey)) {//if exist in the cache
-				if(loader[uniqueKey]===U){//if load succ
-					//timer(callback);//
-					isOuter?timer(callback):timer(WT.d,50,0,WT);
+			if (has(loader,uniqueKey)&&loader[uniqueKey]!==T50F) {//if exist in the cache
+				/*
+					if loader[uniqueKey] === noop
+						then
+							do not load it
+							it will be fired in WT.d;
+					end if
+				*/
+				/**
+					if(!has&&has===T50F){
+	
+					}else if(loader[])
+				*/
+				if(loader[uniqueKey]===TRUE){//if load succ
+					//log(uniqueKey,"is ready")
+					if(mix[uniqueKey]===TRUE){
+						setTimeout(WT.d,T50);
+					}else{
+						needLoad=TRUE;
+					}
 				}else if(isOuter){
 					loader[uniqueKey].push(callback);
 				}
-			} else {
-				loader[uniqueKey]=isOuter?[callback]:noop;//push current callback to the list
-				$JCounter++;
-				head=D.getElementsByTagName('head')[0];
-				head=head?head:E;
+			}else{
+				needLoad=TRUE;
+			}
+
+			if(needLoad) {
+				//log('loader uniqueKey',uniqueKey);
+				loader[uniqueKey]=[callback];//push current callback to the list
+				//$JCounter++;
+				//log(loader[uniqueKey],uniqueKey);
+				DOCHEAD||(DOCHEAD=(D.head||D.getElementsByTagName('head')[0]));
 				//log('qyu',isOuter,uniqueKey,loader[uniqueKey],isOuter?[callback]:noop);
 				callCb=function(){
-					//log(uniqueKey,loader[uniqueKey]);
-					if(isOuter){
-						while(loader[uniqueKey].length){
-							timer(loader[uniqueKey].shift());
-						}
-					}else{
-						timer(callback);
+					if(loader[uniqueKey]!=T50F){//callCb会在文件内的代码执行完后再执行，有可能文件内的代码执行出错
+						tryRun(loader[uniqueKey],uniqueKey);
 					}
+					//if(isOuter)alert(uniqueKey);
+					if(isOuter)delFromObj(loader,uniqueKey);
 				};
+				em=D.createElement(isCss?(isCode?'style':'link'):'script');
+				em.charset=cs;
+
 				if(isCss){
-					preEm=D.getElementById(nodeId);
+					preEm=get(uniqueKey);
 					if(preEm){
 						preEm.id=EMPTY;
 					}
 					//T.log('start new em');
+					
+					em.type='text/css';
+
+					//T.log('em',em,isCode);
 					if(isCode){
-						em=D.createElement('style');
+						//alert(em.styleSheet);
 						if(em.styleSheet){
 							em.styleSheet.cssText=param;
 						}else{
 							em.innerHTML=param;
 						}
 					}else{
-						em=D.createElement('link');
-						em.charset='UTF-8';
 						em.rel='stylesheet';
-
-						if(!timer.$){
-							timer.$=U;
-							timer.S='onload' in em;
+						if(!has(T50FE,'$')){
+							T50FE.$=!('onload' in em);
 						}
 					}
-					em.type='text/css';
+					
 
 					//T.log('enter here');
 					cb=function(f){
+						//log(arguments.callee.caller);
 						//T.log(arguments);
-						if (f===U||resLoadedReg.test(em.readyState)) {
-							clsTimer(tmer);
-							clsTimer(ttmer);
+						//if (f===TRUE||resLoadedReg.test(em.readyState)) {
+							T50F(tempFn,TRUE);
+							//clsTimer(ttmer);
 
 							em.onerror = em.onload = null;
-
-							preEm&&head.removeChild(preEm);
+							if(preEm){
+								DOCHEAD.removeChild(preEm);
+							}
+							//preEm&&preEm.parentNode.removeChild(preEm);
+							//log(callCb);
+							setTimeout(callCb,T50);
 							
-							callCb();
-							
-							if(isOuter){
-								delete loader[uniqueKey];
-							}else{
-								loader[uniqueKey]=U;
+							if(f!==TRUE&&!isOuter){
+								mix[uniqueKey]=TRUE;
+								WT.d(uniqueKey,{safety:TRUE,dps:[],name:uniqueKey});
+							}
+						//}
+					};
+					tempFn=function(idx,file,node){
+						//log(SS.length);
+						for(idx=SS.length-1;idx>=0;idx--){
+							file=SS[idx];
+							node=file.ownerNode||file.owningElement;
+							//log(node,SS.length,file);
+							if(node&&node.id==uniqueKey){
+								//log(node.href);
+								try{
+									//log();
+									cb(file.cssRules);
+								}catch(e){
+									//log(e);
+									if(T50FE.$&&e.code==18)cb();
+								}
+								break;
 							}
 						}
-					};
-					
-					ttmer=timer(cb,3E4,0,cb,U);
-					if(em.readyState){
-						tmer= timer(cb, 50, U);
-					}else if(!isCode && timer.S){
-						em.onload=em.onerror=cb;
-					}else{
-						timer(cb,isCode?50:1E3);
+						//log('pull',SS.length);
 					}
-					if(!isCode){
+					if(isCode){
+						cb();
+					}else{
+
+						em.onload=em.onerror=cb;
+						//alert('bf>'+tempFn);
+						T50F(tempFn);
+
 						em.href=param;
+
+						//log(param);
 					}
 				}else{
-					em = D.createElement('script')
-					//em.type='text/javascript';
+
 					em.defer='defer';
-					em.charset='UTF-8';
-					//em.async=U;
-					cb = function (f) {
-						if (f===U||resLoadedReg.test(em.readyState)) {
-							clsTimer(tmer);
-							clsTimer(ttmer);
+					//em.async=TRUE;
+					cb = function () {
+						//log(f,em.readyState,resLoadedReg.test(em.readyState),em.src);
+						if (resLoadedReg.test(em.readyState)) {
+							T50F(cb,TRUE);
+							//clsTimer(ttmer);
 							em.onerror = em.onload = null;
-							//log(em,em.href);
-							head.removeChild(em);
-							callCb();
+							//log(em,em.hef);
+							DOCHEAD.removeChild(em);
+							setTimeout(callCb,T50);
 						}
 					};
-					ttmer=timer(cb,3E4,0,cb,U);
-					if(em.readyState)tmer= timer(cb, 50, U);//opera load not exist file bug , use setInterval fix it 
+					if(em.readyState){
+						//alert('bf>'+cb);
+						T50F(cb);//opera load not exist file bug , use setInterval fix it 
+					}
 					em.onerror = em.onload = cb;
+					//log(cb,param);
 					if(isCode){
-						em.text='try{'+param+'}catch(e){T.log(e)}document.getElementById("'+nodeId+'").onload()';
+						em.text='try{'+param+'}catch(e){T.log(e)}T("'+uniqueKey+'").onload()';
 					}else{
 						em.src=param;
 					}
 				}
-				em.id=nodeId;
-				head.insertBefore(em,null);
+				em.id=uniqueKey;
+				DOCHEAD.appendChild(em);
 				
 			}
 		},
-		getFileInfo=function(f,r,v,s,t){
+		getFileInfo=function(f,r,v,s,t,m){
+			if(has(im,f))return im[f];
+			//log('getFileInfo',f);
+			//W.$$im=im;
 			s=cssReg.test(f);
-			f=f.replace(jsCssReg,'');
-
-			if(f==verFile)r={h:innerT._F,f:f};
-			t={f:f};
-
+			f=f.replace(jsCssReg,EMPTY);
+			//log(innerT._C);
+			t=f===innerT._C?{h:innerT._F}:{s:s};
 			v=innerT._V;
 			if(v&&v.J&&v.S){
 				if(!s&&v.J[f]&&v.S[f]){
-					throw 'file:'+f+' discrepancy';
+					throwError('conflict:'+f);
 				}
 				if(!v.J[f]&&!v.S[f]){
-					log('not found:'+f);
+					log('unfound:'+f);
 					r=t;
 				}
 				if(!r){
-					r=s?v.S[f]:v.J[f]||(s=U,v.S[f]);
-					if(s)r.s=s;
-					r.f=f;
+					r=s?v.S[f]:v.J[f]||(s=TRUE,v.S[f]);
+					r.s=s;
 				}
 			}
-			return r||t;
-		},
-		getFilePath=function(i,v,m){			
-			v=i||getFileInfo(f);
-			if(innerT._I&&f!=verFile)v.f=v.f.replace(/\./g,'/');
-			m=v.s?innerT._S:innerT._M;
-			return (v.p||rootPath)+(m.replace(/#k/g,v.f).replace(/#v/g,v.h||xver));
+			r=r||t;
+			m=r.s?innerT._S:innerT._M;
+			t=rootPath+(r.p||EMPTY);
+			while(pathReg.test(t))t=t.replace(pathReg,'$1/');
+			r.u=t;
+			r.p=t+m.replace($kReg,f).replace($vReg,r.h||xver);
+			//log(r.p,r.u);
+			return im[f]=r;
 		},
 		innerT={},
 		//main=location.hostname,
-		nowTime=new Date().valueOf(),
+		nowTime=+new Date(),
 		xver=nowTime.toString(32),
-		store, engine,engines,cache;//control file versions name,storage prefix;
+		store, engine,cache;//control file versions name,storage prefix;
+	//W.$mix=mix;
+	//W.$loader=loader;
 	if(!T){//if not exist Ctrl
-		cache=paramFrom('c',scriptCfg)=='true';//recognize need cache
-		mix(innerT,{
-			_M:paramFrom('jf',scriptCfg)||'#k.js?v=#v.js',//load js file format
-			_S:paramFrom('cf',scriptCfg)||'#k.css?v=#v.css',
-			_I:paramFrom('sis',scriptCfg)=='true',//the period is path segmentation
-			_F:paramFrom('cfv',scriptCfg)||xver
+		scriptCfg.replace(/([^=&]+)=([^&]*)/g,function(m,a,b){
+			paramObj[a]=b;
 		});
-		W.T=T={//
-			using:function(p,f){//
+		//log(paramObj);
+		cache=paramObj.c=='1';//recognize need cache
+		mix(innerT,{
+			_M:paramObj.jf,//load js file format
+			_S:paramObj.sf,
+			//_I:paramObj.sis=='1',//the period is path segmentation
+			_F:paramObj.cfv||xver,
+			_C:paramObj.cf
+		});
+		W.T=T=get;
+		mix(T,{//
+			use:function(p,f){//
 				if(!T.$r)T.$r=[];
 				T.$r.push([p,f]);
 				return T
 			},
 			idle:function(f){//
 				if(!T.$a)T.$a=[];
-				T.$a.push(f);
-				return T
-			},			
+				T.$a.push(f)
+			},
 			publish:function(o){//
 				if(!T._L)T._L={};
 				mix(T._L,o);
 				return T
 			}
-		};
+		});
 	}else{
 		if(ia(T.$w)){
-			watchList=watchList.concat(T.$w);
-			delete T.$w;
+			watchResList=watchResList.concat(T.$w);
 		}
+		delFromObj(T,'$w');
 		cache=T.cache;
 	}
 	mix(WT,{
 		i:0,
+		c:0,
 		$:{},
 		L:{},
-		d:function(m,p,k,f){
-			m=this;
-			for(p in m.$){//m.$ keep the entities of WT
-				//log(p);
-				m.$[p].r()
-			}
-			//log('wt count:',m.c);
-			m._=f=$JCounter==$RCounter;
-			//log('loader',$JCounter,'$R',$RCounter,f);
-			/*for(p in loader){
-				if(loader[p]!=U){
-					WT._=f=U;
-					break;
+		d:function(k,e,p){
+			setTimeout(function(){
+				if(k){
+					loader[k]=TRUE;
 				}
-			}*/
-			//log(f);
-			runWatch(f);
-			if(f){//run idle methods
-				T.idle=ready;
-				if(T.$a){
-					tryRun(T.$a);
-					delete T.$a;
+				if(e&&!has(ia,k)){
+					ia[k]=TRUE;
+					tryRun(watchResList,e);
 				}
-			}
+				for(p in WT.$){//m.$ keep the entities of WT
+					has(WT.$,p)&&WT.$[p].r()
+				}
+				//log(k,e);
+				if(e&&!e.safety){
+					loader[k]=T50F;
+					//delFromObj(loader,k);
+				}
+			})
 		},
-		n:function(k){//notify one ready
-			timer(function(){
-				if($R[k]!==U){//$R save how many files loaded
-					loader[k]=U;
-					$R[k]=U;
-					$RCounter++;
-					//var a=[];
-					//for(var p in $R)a.push(p);
-					//log(a);
-					if(im(T.onresload)){
-						tryRun(function(){
-							T.onresload(k,$R);//notify T loaded file
-						});
-					}
-				}
-				WT.d(k);
-			},50);
-		},
+		/*
+			T.cache('a',['b','c']);
+
+			T.cache('a',['e','f']);
+
+			WT.L['a']=['b','c'];
+
+			T.cache('b',['a']);
+
+			WT.L['b']=
+		*/
 		l:function(key,values,pu,arr,idx,tKey,tV){//check circle reference
 			if(!ia(WT.L[key]))WT.L[key]=[];//save key depend list
 			arr=[];
@@ -338,10 +394,10 @@
 				if(!pu)WT.L[key]=WT.L[key].concat(values);//save the key depends
 				for(idx=0;idx<values.length;idx++){//test depend
 					tKey=values[idx];//
-					if(tKey==key){//find same
+					if(tKey===key){//find same
 						arr.push(key);//push
 					}else{
-						tV=WT.l(key,WT.L[tKey],U);//test next key
+						tV=WT.l(key,WT.L[tKey],TRUE);//test next key
 						if(tV)arr.push(tKey,tV);
 					}
 				}
@@ -352,20 +408,29 @@
 			r:function(m,i,j){
 				m=this;
 				j=m.k.length;
-				if(j){//if !j the list of current depend is ready
-					for(i=0;i<j;i++){
-						//log(m.k,loader[m.k[i]]);
-						if(loader[m.k[i]]===U){
-							j--;
-							m.k.splice(i--,1);
-						}
+				//if(j){//if !j the list of current depend is ready
+				for(i=0;i<j;i++){
+					//log(m.k,m.k[i],loader[m.k[i]]);
+					if(loader[m.k[i]]===TRUE){
+						j--;
+						m.k.splice(i--,1);
 					}
 				}
+				//}
 				if(!j){
 					//log('rm:',m.z,m.f);
-					//WT.c--;
+					WT.c--;
 					im(m.f)&&m.f();
-					delete WT.$[m.z];
+					delFromObj(WT.$,m.z);
+				}
+				if(!WT.c&&!WT._){
+					//runWatch(WT._=TRUE);
+					WT._=TRUE;
+					T.idle=tryRun;
+					if(T.$a){//run cache idle list
+						tryRun(T.$a);
+						delFromObj(T,'$a');
+					}
 				}
 			},
 			a:function(k){
@@ -373,19 +438,9 @@
 			}
 		}
 	});
-	//window.WT=WT;
-	//window.loader=loader;
-	//set domain ,globalStorage need it, force the domain 
-	/*tryRun(function(){
-		D.domain=main;
-        D.domain=main.split('.').slice(-2).join('.');
-	});*/
-	engines = {//local storage engine
-		'0': {
-			_: function () {
-				store = W.localStorage;
-				return store;
-			},
+	store=W.localStorage;
+	if(store){
+		engine={
 			get: function (key) {
 				return store.getItem(key);
 			},
@@ -396,112 +451,171 @@
 			del: function (key) {
 				store.removeItem(key);
 			}
-		},
-		/*'2': {
-			_: function () {
-				store = W.globalStorage[D.domain];
-				return store;
-			},
-			get: function (key) {
-				return store.getItem(key).value;
-			},
-			set: function (key, value) {
-				store.setItem(key, value);
-			},
-			del: function (key) {
-				store.removeItem(key);
-			}
-		},*/
-		'1': {
-			_: function () {
-				store = E;
-				store.addBehavior('#default#userdata');
-				return U
-			},
-			get: function (key) {
-				key='_'+key;
-				//try {
+		}
+	}else{
+		try{
+			store = E;
+			store.addBehavior('#default#userdata');
+			engine={
+				get:function (key) {
 					store.load(key);
 					return store.getAttribute(key);
-				//} catch (ex) {
-					//return '';
-				//}
-			},
-			set: function (key, value) {
-				key='_'+key;
-				store.load(key);
-				//alert(key);
-				store.setAttribute(key, value);
-				//alert('set '+key);
-				store.save(key);
-			},
-			del: function (key) {
-				key='_'+key;
-				store.load(key);
-				//store.removeAttribute();
-				store.expires = nowTime.toUTCString();
-				store.save(key);
+				},
+				set:function (key, value) {
+					store.load(key);
+					store.setAttribute(key, value);
+					store.save(key);				
+				},
+				del:function (key) {
+					store.load(key);
+					store.expires = nowTime.toUTCString();
+					store.save(key);
+				}
 			}
-		}
-	};
-	for (var i = 0,f; i<3; i++) {
-		engine = engines[i];
-		try{
-			f=engine._();
-		}catch(e){}
-		if (f) {
-			delete engine._;
-			break;
-		} else {
-			engine = 0;
+		}catch(e){
+			engine = {
+				get: noop,
+				set: noop,
+				del: noop
+			}
 		}
 	}
-	if(!engine){
-        engine = {
-            get: noop,
-            set: noop,
-            del: noop
-        }
-    }
-	var vf,getContent=function(f,v,z,r){//get cache content
-		r=has.call(paramFrom,f)&&paramFrom[f];
+	for(var prop in engine){
+		engine[prop]=tryWrap(engine[prop],EMPTY,EMPTY);
+	}
+	//window.T50F=T50F;
+	//W.$loader=loader;
+	//W.$mix=mix;
+	var cacheFn=function(key,dps,value,fn){
+		/// <param name="key" type="String">cache key,same as file name</param>
+		/// <param name="value" type="Function">cache content,is a function</param>
+		mix[key]=noop;//used in fileLoaded ,设置后标识这个文件下载成功，否则认为该文件下载不成功
+		if(im(dps)){
+			value=dps;
+			dps=[];
+		}
+		fn=WT.l(key,dps);
+		if(fn)throwError(fn+' @ '+key);
+		//log(dps);
+		runFiles(dps,function(e,i){
+			//T.log('deps',e,key,dps);
+			//log(key,mix[key]);
+			i=getFileInfo(key);
+			e.name=key;
+			e.path=i.u;
+			e.pkg=key.replace(holderReg,EMPTY);
+			
+			//log('after',key,mix[key]);
+			if(!e.safety){
+				mix[key]={c:value,d:e.dps};//cache the loaded value and deps
+			}
+			//exec succ then cache it,avoid cache a error file and read it next time
+			if(tryWrap(value,W,noop)(e)===noop){
+				e.safety=FALSE;
+				e.reason='exec';
+				//mix[key]=noop;
+			}else{
+				if(e.safety){
+					mix[key]=TRUE;//cache if value exec success
+				}
+				cache&&engine.set(key, i.h + '<'+e.dps+'>'+ value);
+			}
+			//alert(e.name+','+e.reason);
+			WT.d(key,e);//notify one ready ,maybe not success
+		});
+	},isCached=function(f,r,i,z,m){
+		if(!ia(f))f=[f];
+		//log(f);
+		for(i=0;i<f.length;i++){
+			m=f[i];
+			if(m){
+				//log(m,loader[m],mix[m]);
+				if(has(loader,m)){
+					//log(m,mix[m],mix[m]==noop)
+					z=mix[m]===TRUE;
+				}else if(cache){
+					r=getContent(m);
+					z=r&&isCached(r.d);
+				}
+				z=!z;
+				//log('isCached',z,m);
+				if(z)return!z;
+			}
+		}
+		//log(f);
+		return TRUE;
+	},getContent=function(f,v,z,r){//get cache content
+		r=has(delFromObj,f)&&delFromObj[f];
 		if(!r){
 			v=engine.get(f);
-			if(v&&new RegExp('^'+getFileInfo(f).h+':').test(v)){
+			if(v&&RegExp('^'+getFileInfo(f).h+'<').test(v)){
 				z=v.match(depsReg);
-				r={c:v.replace(verReg,''),d:z&&z[1].split(',')||[]};
+				//log(z);
+				r={c:v.replace(verReg,EMPTY),d:z&&z[1].split(COMMA)||[]};
+				//log(r.d,r.c,r,f);
+				r.o=['T.cache("',f,'","',r.d,'",',r.c,')'].join(EMPTY);
 			}
-			paramFrom[f]=r;
+			delFromObj[f]=r;
 		}
 		return r;
-	},runOne=function(host,p,fn,temp,info){//run one file
-		//idx=p.lastIndexOf('/');
-		//p=p.substring(p.lastIndexOf('/')+1);//depart the path and file
-		host.a(p);
-		temp=getContent(p);
-		info=getFileInfo(p);
-		if(temp){
-			fn=function(){loader('('+temp.c+'())',p,function(){WT.n(p)},U)};
-			runFiles(temp.d,fn);
-		}else{
-			loader(getFilePath(info),p,function(){timer(function(){if(!mix[p])WT.n(p)},50)},0,info.s);//!mix see cache if not set ,not call cache method
+	},fileLoaded=function(fn){
+		//log('fileLoaded',fn,has(mix,fn));
+		if(!has(mix,fn)){
+			//log('yaa~~');
+			WT.d(fn,{safety:FALSE,name:fn,reason:'load'})//load failed
 		}
-	},runFiles=function(p,f,wt,idx){//run more than one files
-		if(!ia(p))p=[p];
-		if(p.length){
-			wt=new WT();
-			wt.f=function(){tryRun(f)};
-			for(idx=0;idx<p.length;idx++){
-				runOne(wt,p[idx]);
+	},runFiles=function(p,f,wt,idx,mem,temp,info,file,hasLoad){//run more than one files
+		if(!ia(p)){
+			p=p?(p+EMPTY).split(COMMA):[];
+		}
+		//log(p,p.length);
+		f=tryWrap(f||noop);
+		wt=new WT();
+		wt.f=function(x){
+			//通过runFiles得到的reason只能是依赖出错，不可能拿到exec出错，因为它可以是多个文件
+			f({safety:x=isCached(p),dps:p,reason:x?EMPTY:'dps'})// exec error  dps unready
+		};
+
+		for(idx=0;idx<p.length;idx++){
+			file=p[idx];
+			if(file){
+				hasLoad=TRUE;
+				//log('start load file',file);
+				wt.a(file);
+				mem=has(mix,file)&&mix[file];
+				//log(mem);
+				if(mem&&mem!==noop){//from memory , if we loaded file and deps not ready,avoid load the res again
+					//log('from mem',mem);
+					mem===TRUE?WT.d(file):cacheFn(file,mem.d,mem.c);
+				}else{
+					if(cache){
+						temp=getContent(file);
+					}
+					info=getFileInfo(file);
+					//log('load1');
+					//log(temp,info);
+					loader(temp?temp.o:info.p,file,fileLoaded,temp,info.s);
+				}
 			}
-		}else{
-			tryRun(f);
 		}
+		if(!hasLoad){
+			WT.d();
+		}
+		return T
+		//log('hasLoad',hasLoad,p,arguments.callee.caller);
 	};
 	mix(T,{
 		Store:engine,
-		observe:watch,
 		log:log,
+		isCached:isCached,
+		cache:cacheFn,
+		error:throwError,
+		tryRun:tryRun,
+		tryWrap:tryWrap,
+		has:has,
+		listen:function(f){
+			watchResList.push(f)
+		},
 		//:D.domain,
 		invoke:function(a,i,f,z){
 			if(ia(a)){
@@ -511,72 +625,52 @@
 				return f;
 			}
 			z=T._L;
-			f=!U;
-			if(z&&im(z[a])){
-				f=z[a].apply(z,s.call(arguments,1));
+			if(z&&im(f=z[a])){
+				f=f.apply(z,s.call(arguments,1));
 			}
-			return f;
+			return f||FALSE;
 		},
-		isCached:function(f,r,i,z){
-			r=loader[f]||getContent(f);
-			if(r){
-				if(r.d&&r.d.length){
-					for(i=0;i<r.d.length;i++){
-						z=T.isCached(r.d[i]);
-						if(!z)return z;
-					}
-				}
-				z=U;
-			}else{
-				z=!U;
-			}
-			return z;
-		},
-		cache:function(key,dps,value,fn){
-			/// <param name="key" type="String">cache key,same as file name</param>
-			/// <param name="value" type="Function">cache content,is a function</param>
-			mix[key]=U;
-			if(!ia(dps))dps=[];
-			fn=WT.l(key,dps);
-			if(fn)throw new Error(fn+' @ '+key);
-			//log(dps);
-			runFiles(dps,function(){
-				WT.n(key);
-				value(); //exec succ then cache it,avoid cache a error file and read it next time
-				cache&&engine.set(key, getFileInfo(key).h + ':['+dps+']@'+ value);
-			});
-		},
-		load:function(ops,df){
+		load:function(ops,df,js){
+			js='js';
 			df=mix({
-				type:'css',
+				type:js,
 				url:EMPTY,
 				code:EMPTY,
 				id:EMPTY,
-				done:noop
+				done:noop,
+				charset:EMPTY
 			},ops);//param,uniqueKey,callback,isCode,isCss,isOuter,nodeId,tId,callCb,head,em,tmer,cb,ttmer,preEm
-			loader(df.code||df.url,EMPTY,df.done,df.code,df.type=='css',U,df.id);
+			//log(df.type===js);
+			loader(df.code||df.url,df.id,df.done,df.code,df.type!==js,TRUE,df.charset);
 		}
 	});
+
 	/*startup*/
-	runFiles(verFile,function(c){
-		innerT._V=T._V;
+	runFiles(innerT._C,function(e,c,preg,list,idx){
+		//log('after TFV',e);
+		preg=/^_[MFCSV]$/;
 		for(c in T){
-			if(/^_[MIFVS]$/.test(c)){
+			if(has(T,c)&&preg.test(c)){
 				innerT[c]=T[c];
-				if(cache)delete T[c];
+				//log(cache,c);
+				if(cache){
+					delFromObj(T,c);
+				}
+				//log(T[c]);
 			}
 		}
+		//log(T._V);
 		//delete T._V; //if hide more info then delete it
 		//runFiles(coreList&&coreList.split(',')||[],coreCallback);
-		T.using=function(p,f){
-			runFiles(p,f);
-			return T;
-		};
-		if(T.$r){
-			for(var i=0;i<T.$r.length;i++){//core file ready run require file 
-				runFiles(T.$r[i][0],T.$r[i][1]);
+		T.use=runFiles;
+		list=T.$r;
+		if(ia(list)){
+			for(idx=0;idx<list.length;idx++){//core file ready run require file 
+				runFiles(list[idx][0],list[idx][1]);
 			}
-			delete T.$r;
+			delFromObj(T,'$r');
 		}
+
+		curScript.parentNode.removeChild(curScript);
 	});
-}(window,document));
+}(this,document));

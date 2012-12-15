@@ -1,1 +1,1 @@
-<script src="scripts/T.js?v=yx6z24u50zy335k2.js" data-cfg="c=true&sis=false&jf=#k.js?v=#v.js&cf=#k.css?v=#v.css&cfv=4y3yvwxvw61626w1" id="t_js"></script>
+<script src="scripts/T.source.js?v=ygw56wyxz0zvvwg5.js" data-cfg="c=0&jf=#k.source.js?v=#v.js&sf=#k.css?v=#v.css&cf=T.FVS&cfv=xu4v5113vwz1y61k" id="t_js"></script>

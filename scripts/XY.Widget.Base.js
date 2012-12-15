@@ -1,1 +1,1 @@
-T.cache("XY.Widget.Base",["K"],function(){var a=K.entity("XY.Widget");a.Base=K.clazz(K.Evt,{ctor:function(){K.log("base ctor")},show:function(){K.log("base show.....")}})});
+T.cache("XY.Widget.Base",["K"],function(a){if(a.safety){T.log(a.name,a);a=K.entity(a.pkg);a.Base=K.clazz(K.Evt,{ctor:function(){T.log("base ctor,ok?")},show:function(){T.log("base show.....,haha\uff0c\u641e\u5b9a")}})}});
