@@ -1,0 +1,76 @@
+<!DOCTYPE>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>HTA</title>
+		<meta http-equiv="MSThemeCompatible" content="yes">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<HTA:Application ID="HTA"
+			applicationname="HTA"
+			caption="yes"
+		　	singleinstance="yes"
+            showintaskbar="no"
+		/>
+	</head>
+	<body>
+		
+	</body>
+	<script type="text/javascript">
+    while(true){
+        window.resizeTo(200,80);
+        window.moveTo(-200,-80);
+        break;
+    }
+	(function(){
+		var fso=new ActiveXObject("Scripting.FileSystemObject"),
+			ts=fso.OpenTextFile('scripts/T.Single.inc',1)
+			rs=ts.ReadAll();
+			ts.Close();
+			document.write(rs);
+	}());
+	</script>
+	<script type="text/javascript">
+    var Cfg={
+        name:'xinglie.lkf',
+        pwd:'lkf@102406'
+    }
+    T.use('X.HTA.IE',function(e){
+        var IE=K.access(e.dps[0]);
+        var ie=new IE({visible:false});
+        ie.on(IE.LOADED,function(e){
+            if(K('edit-submit',null,null,e.doc)){
+                alert('xx');
+                K.nodeVal('edit-name',Cfg.name,e.doc);
+                K.nodeVal('edit-pass',Cfg.pwd,e.doc);
+                K('edit-submit',null,null,e.doc).click();
+            }else{
+                var reg=/\/dingcan\/\d+$/i;
+                var bReg=/\/budingcan$/i;
+                var anchors=[];
+                var budingcan;
+                K.nodeByTags('a',e.doc,function(i){
+                    if(bReg.test(i.href)){
+                        budingcan=true;
+                    }else if(!budingcan&&reg.test(i.href)){
+                        anchors.push(i);
+                    }
+                },e.doc);
+                if(!budingcan){
+                    if(anchors.length){
+                        var idx=Math.round(Math.random()*(anchors.length-1));
+                        anchors[idx].click();
+                    }else{
+                        alert('无法识别出今天的晚饭');
+                    }
+                }else{
+                    if(confirm('今天的晚餐已订成功~~~，是否查看？')){
+                        window.open('http://bjdc.taobao.ali.com/');
+                    }
+                    ie.dispose();
+                    self.close();
+                }
+            }
+        });
+        ie.navigate('http://bjdc.taobao.ali.com/');
+    });
+	</script>
+</html>

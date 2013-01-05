@@ -812,7 +812,7 @@ T.cache('K',function(e) {
 			/// <param name="o" type="String|HTMLElement">in what node</param>
 			/// <param name="f" type="Function">filter callback</param>
 			/// <returns type="HTMLCollection" />
-			a = K(o,Q,Q,d) || D;
+			a = K(o,Q,Q,d) || d || D;
 			r = [];
 			if (a.getElementsByTagName) {
 				n = isArr(n) ? n : [n];
